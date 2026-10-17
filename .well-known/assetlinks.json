@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.github.manguy12341234.evsuit",
+        "sha256_cert_fingerprints": ["91:EC:A5:52:37:75:33:71:67:32:7B:B1:F3:98:D3:65:3D:78:9C:6C:02:D4:DB:21:ED:58:E1:12:51:7E:4F:BF"]
+      }
+    }]
