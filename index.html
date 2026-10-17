@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#02060a">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
+<title>E.V. Suit Interface</title>
+<style>
+:root{--c:#3df2ff;--r:#ff3d5a;--bg:#02060a;--f:ui-monospace,"Courier New",monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--c);font:12px var(--f);overflow:hidden;overscroll-behavior:none}
+#stage{position:fixed;inset:0;transform-origin:center;transition:transform .25s}
+#stage>*{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+body.nv #stage::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,transparent 45%,rgba(0,0,0,.75));pointer-events:none}
+#hud{position:fixed;inset:0;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);pointer-events:none;text-shadow:0 0 6px var(--c)}
+#top{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);left:12px;right:12px;display:flex;gap:18px;letter-spacing:.12em}
+#top span:last-child{margin-left:auto}
+#ret{position:absolute;left:50%;top:50%;width:26vmin;height:26vmin;transform:translate(-50%,-50%);border:1px solid var(--c);border-radius:50%;opacity:.7;background:linear-gradient(var(--c),var(--c)) center/1px 30% no-repeat,linear-gradient(var(--c),var(--c)) center/30% 1px no-repeat;transition:.15s}
+#ret.lock{border-color:var(--r);border-width:2px;transform:translate(-50%,-50%) scale(.85);box-shadow:0 0 18px var(--r)}
+#rad{position:absolute;left:14px;bottom:14px;width:26vmin;height:26vmin;max-width:150px;max-height:150px}
+#cap{position:absolute;left:calc(26vmin + 30px);bottom:16px;right:90px;max-height:3.6em;overflow:hidden;line-height:1.2}
+#ss{position:absolute;inset:0;opacity:0;box-shadow:inset 0 0 90px 24px var(--r);transition:opacity .1s}
+#menu,#ptt{position:absolute;right:14px;pointer-events:auto}
+#menu{top:40px}#ptt{bottom:16px;width:64px;height:64px;border-radius:50%}
+button,select{font:inherit;color:var(--c);background:rgba(2,16,24,.7);border:1px solid var(--c);padding:10px 14px;border-radius:6px;letter-spacing:.1em;pointer-events:auto}
+button.on{background:var(--c);color:#000}
+.pane{position:fixed;top:0;bottom:0;right:0;width:min(340px,70vw);padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 14px;background:rgba(2,10,16,.93);border-left:1px solid var(--c);display:none;flex-direction:column;gap:10px;overflow:auto;z-index:5}
+.pane.on{display:flex}#settings{z-index:6}
+.pane label{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pane small{opacity:.7;line-height:1.35}
+#boot,#rot{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center}
+#rot{display:none;z-index:10}@media(orientation:portrait){#rot{display:flex}}
+#boot h1{margin:0;font-size:22px;letter-spacing:.4em;font-weight:400}
+body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-rotate(60deg)}100%{filter:none}}
+.noglow *{text-shadow:none!important;box-shadow:none!important}
+[hidden]{display:none!important}
+</style></head><body>
+<div id="stage"><video id="v" playsinline muted></video><canvas id="ov"></canvas></div>
+<div id="hud"><div id="top"><span id="bat">BAT --</span><span id="hd">HDG ---°</span><span id="fps">-- FPS</span><span id="st">STANDBY</span></div>
+<div id="ret"></div><canvas id="rad" width="300" height="300"></canvas><div id="cap">E.V. standing by.</div><div id="ss"></div>
+<button id="ptt" hidden>HOLD</button><button id="menu">☰ TOOLS</button></div>
+<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-th">NIGHT VISION</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-ph">PHOTO</button><button id="b-sh">SHARE LAST</button><button id="b-se">SETTINGS</button></div>
+<div id="settings" class="pane"><button data-x="close">BACK ✕</button>
+<label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
+<label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
+<small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
+<small>Night vision brightens what the camera already sees (green tint, automatic gain). In total darkness it shows noise, not a scene.</small></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button></div>
+<div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
+<script type="module">
+const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
+const S={voice:"wake",saver:false,hap:true,tts:true};
+try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
+const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
+const st={run:false,booted:false,nv:false,sense:true,speaking:false,awake:0,heading:null,I:0,boxes:[],lock:"",raf:0};
+let ng=1,stream,track,caps={},det,wl,deferred,bat,last,warned=0,infMs=100,adapt=0,low=0,frames=0,t0=performance.now(),lastInf=0,lastAlert=0,prev,skip=0;
+const MODEL="https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",MP="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/";
+const vib=p=>{if(S.hap&&navigator.vibrate)try{navigator.vibrate(p)}catch{}};
+const cap=t=>{$("#cap").textContent=t};
+/* ---------- speech out ---------- */
+let voice;const pick=()=>{const v=speechSynthesis.getVoices().filter(x=>/^en[-_](US|GB)/i.test(x.lang));voice=v.find(x=>/google/i.test(x.name)&&/female|uk english/i.test(x.name))||v.find(x=>/google/i.test(x.name))||v.find(x=>/female|samantha|zira/i.test(x.name))||v[0]};
+if(window.speechSynthesis){pick();speechSynthesis.addEventListener("voiceschanged",pick)}
+function say(t){cap("E.V.: "+t);if(!S.tts||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);if(voice){u.voice=voice;u.lang=voice.lang}u.pitch=1.05;st.speaking=true;pauseRec();const d=()=>{st.speaking=false;resumeRec()};u.onend=d;u.onerror=d;speechSynthesis.speak(u)}
+/* ---------- speech in ---------- */
+const SR=window.webkitSpeechRecognition;let rec,want=false,recStart=0,delay=300,timer;
+function startRec(){if(!SR||!want||st.speaking||document.hidden||rec)return;rec=new SR();rec.lang="en-US";rec.continuous=S.voice==="wake";rec.interimResults=false;
+rec.onstart=()=>{recStart=Date.now()};
+rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)hear(e.results[i][0].transcript)};
+rec.onerror=e=>{if(/not-allowed|service-not-allowed/.test(e.error)){want=false;cap("Mic blocked: allow microphone in site settings.")}};
+rec.onend=()=>{rec=null;delay=Date.now()-recStart>3000?300:Math.min(delay*2,3000);if(S.voice==="wake")timer=setTimeout(startRec,delay)};
+try{rec.start()}catch{rec=null}}
+function pauseRec(){clearTimeout(timer);if(rec){const r=rec;rec=null;r.onend=null;try{r.abort()}catch{}}}
+function resumeRec(){clearTimeout(timer);if(S.voice==="wake")timer=setTimeout(startRec,300)}
+function hear(t){t=t.toLowerCase().trim();cap("“"+t+"”");let c;const m=t.match(/\b(e\.?\s?v\.?|evie|eevee|eevie)\b[,\s]*(.*)$/);
+if(S.voice==="hold")c=t;else if(m){c=m[2];st.awake=Date.now()+6000;if(!c)return say("Online.")}else if(Date.now()<st.awake)c=t;else return;cmd(c)}
+function cmd(c){let m;
+if(/flash|torch/.test(c))return torch(!/off/.test(c));
+if(/zoom (out|reset)/.test(c))return zoom(1);
+if(m=c.match(/zoom\s*(?:to\s*)?(\d)/))return zoom(+m[1]);
+if(/night|vision/.test(c))return setN(!/off/.test(c));
+if(/spider|sense/.test(c)){st.sense=!/off/.test(c);$("#b-ss").classList.toggle("on",st.sense);return say("Spider-Sense "+(st.sense?"active":"disabled"))}
+if(/photo|picture|capture|snap/.test(c))return photo();
+if(/share/.test(c))return share();
+if(/battery|status/.test(c))return say(bat?`Power at ${Math.round(bat.level*100)} percent${bat.charging?", charging":""}.`:"Power telemetry unavailable.");
+if(/setting/.test(c))return openL("settings");
+say("Command not recognised.");vib(400)}
+/* ---------- camera & device ---------- */
+async function cam(){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});
+V.srcObject=stream;await V.play();track=stream.getVideoTracks()[0];caps=track.getCapabilities?track.getCapabilities():{};
+if(caps.focusMode&&caps.focusMode.includes("continuous"))track.applyConstraints({advanced:[{focusMode:"continuous"}]}).catch(()=>{});
+$("#tbtn").hidden=!caps.torch;OV.width=V.videoWidth;OV.height=V.videoHeight}
+async function torch(on){if(!caps.torch)return say("Torch unavailable on this camera.");try{await track.applyConstraints({advanced:[{torch:on}]});$("#tbtn").classList.toggle("on",on);say("Flashlight "+(on?"on":"off"))}catch{vib(400);say("Torch failed.")}}
+async function zoom(z){if(caps.zoom){const k=Math.min(Math.max(z,caps.zoom.min),caps.zoom.max);try{await track.applyConstraints({advanced:[{zoom:k}]});$("#stage").style.transform="";return say(`Zoom ${k}x, optical.`)}catch{}}
+$("#stage").style.transform=`scale(${z})`;say(`Zoom ${z}x, digital.`)}
+const gain=m=>{ng=ng*.9+Math.min(8,Math.max(1,100/Math.max(m,5)))*.1;V.style.filter=`grayscale(1) brightness(${ng.toFixed(2)}) contrast(1.25) sepia(1) hue-rotate(55deg) saturate(3.5)`};
+async function setN(on,q){st.nv=on;document.body.classList.toggle("nv",on);$("#b-th").classList.toggle("on",on);if(!on){V.style.filter="";ng=1}
+try{if(caps.exposureCompensation)await track.applyConstraints({advanced:[{exposureCompensation:on?caps.exposureCompensation.max:0}]})}catch{}
+if(!q)say("Night vision "+(on?"engaged":"off"))}
+const wlock=async()=>{try{wl=await navigator.wakeLock.request("screen")}catch{}};
+addEventListener("deviceorientationabsolute",e=>{if(e.alpha==null)return;st.heading=(360-e.alpha+(screen.orientation?.angle||0))%360;$("#hd").textContent="HDG "+String(Math.round(st.heading)).padStart(3,"0")+"°"});
+navigator.getBattery?.().then(b=>{bat=b;const u=()=>{$("#bat").textContent=`BAT ${Math.round(b.level*100)}%${b.charging?" ⚡":""}`;if(b.level<=.2&&!b.charging&&!warned){warned=1;vib(400);say("Suit power low.")}if(b.level>.25)warned=0};b.addEventListener("levelchange",u);b.addEventListener("chargingchange",u);u()});
+/* ---------- detector ---------- */
+async function loadDet(){if(det)return;try{const M=await import(MP+"vision_bundle.mjs"),fs=await M.FilesetResolver.forVisionTasks(MP+"wasm");
+const mk=d=>M.ObjectDetector.createFromOptions(fs,{baseOptions:{modelAssetPath:MODEL,delegate:d},runningMode:"VIDEO",scoreThreshold:.45,maxResults:6});
+try{det=await mk("GPU")}catch{det=await mk("CPU")}$("#st").textContent="TARGETING ONLINE"}catch{$("#st").textContent="MOTION ONLY";cap("Target AI not cached yet. Open once online. Motion sensing still active.")}}
+/* ---------- render loop ---------- */
+const sc=document.createElement("canvas");sc.width=160;sc.height=90;const sx=sc.getContext("2d",{willReadFrequently:true}),ox=OV.getContext("2d"),rx=RD.getContext("2d");
+function tick(ts){if(!st.run)return;st.raf=requestAnimationFrame(tick);frames++;
+if(ts-t0>=1000){const f=frames*1000/(ts-t0);$("#fps").textContent=Math.round(f)+" FPS"+(adapt?` · ADAPT ${adapt}`:"");low=f<24?low+1:0;frames=0;t0=ts;if(low>=3){low=0;degrade()}}
+if(V.readyState<2)return;
+if(!(S.saver&&(skip^=1))){analyse(ts)}
+if(ts-lastInf>(S.saver?300:infMs)&&det){lastInf=ts;try{st.boxes=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}))}catch{}}
+draw(ts);radar(ts)}
+function degrade(){adapt++;if(adapt===1)infMs=250;else if(adapt===2)document.body.classList.add("noglow");else infMs=500}
+function analyse(ts){sx.drawImage(V,0,0,160,90);const d=sx.getImageData(0,0,160,90).data,n=160*90,L=new Uint8Array(n);let mv=0,sum=0;
+for(let i=0,p=0;i<n;i++,p+=4){const y=(d[p]*77+d[p+1]*150+d[p+2]*29)>>8;L[i]=y;sum+=y;if(prev&&Math.abs(y-prev[i])>28)mv++}
+if(st.nv)gain(sum/n);
+const m=prev?mv/n:0;prev=L;let tgt=m>.6?0:Math.min(1,m*6);
+const big=st.boxes.reduce((a,b)=>Math.max(a,b.w*b.h/(V.videoWidth*V.videoHeight)),0);if(big>.25)tgt=Math.max(tgt,Math.min(1,(big-.25)*2.5));
+st.I=st.I*.8+(st.sense?tgt:0)*.2;$("#ss").style.opacity=st.I>.2?Math.min(1,st.I):0;
+if(st.I>.35&&Date.now()-lastAlert>900-600*st.I){lastAlert=Date.now();const p=[],k=Math.ceil(st.I*3);for(let i=0;i<k;i++)p.push(25+st.I*60,45);vib(p)}}
+function draw(ts){ox.clearRect(0,0,OV.width,OV.height);const cx=OV.width/2,cy=OV.height/2;let best,bd=1e9;
+ox.lineWidth=Math.max(2,OV.width/400);ox.font=`${Math.round(OV.width/55)}px monospace`;
+for(const b of st.boxes){const dx=b.x+b.w/2-cx,dy=b.y+b.h/2-cy,dd=Math.hypot(dx,dy);if(dd<bd){bd=dd;best=b}}
+for(const b of st.boxes){const L=b===best&&bd<OV.width*.18;ox.strokeStyle=ox.fillStyle=L?"#ff3d5a":"#3df2ff";ox.strokeRect(b.x,b.y,b.w,b.h);ox.fillText((L?"LOCK ":"")+b.l.toUpperCase(),b.x+4,b.y-6)}
+const key=best&&bd<OV.width*.18?best.l:"";$("#ret").classList.toggle("lock",!!key);if(key!==st.lock){st.lock=key;if(key){vib([40,60,40]);cap("Target locked: "+key)}}}
+function radar(ts){const R=150;rx.clearRect(0,0,300,300);rx.strokeStyle=rx.fillStyle="#3df2ff";rx.lineWidth=2;rx.globalAlpha=.8;
+for(const r of[1,.66,.33]){rx.beginPath();rx.arc(R,R,r*(R-8),0,7);rx.stroke()}
+const a=ts/1500%(Math.PI*2);rx.globalAlpha=.5;rx.beginPath();rx.moveTo(R,R);rx.lineTo(R+Math.sin(a)*(R-8),R-Math.cos(a)*(R-8));rx.stroke();
+if(st.heading!=null){const h=-st.heading*Math.PI/180;rx.globalAlpha=1;rx.fillText("N",R+Math.sin(h)*(R-20)-5,R-Math.cos(h)*(R-20)+5)}
+rx.fillStyle="#ff3d5a";rx.globalAlpha=1;const z=parseFloat($("#stage").style.transform.replace(/\D/g,""))||1;
+for(const b of st.boxes){const ar=b.w*b.h/(V.videoWidth*V.videoHeight),br=((b.x+b.w/2)/V.videoWidth-.5)*66*Math.PI/180/z,r=Math.max(.2,Math.min(.95,1.05-Math.sqrt(ar)*1.6))*(R-8);
+rx.beginPath();rx.arc(R+Math.sin(br)*r,R-Math.cos(br)*r,7,0,7);rx.fill()}}
+/* ---------- photo / share ---------- */
+function photo(){const c=document.createElement("canvas");c.width=V.videoWidth;c.height=V.videoHeight;const x=c.getContext("2d");if(st.nv)x.filter=V.style.filter||"none";x.drawImage(V,0,0,c.width,c.height);x.filter="none";x.drawImage(OV,0,0);
+c.toBlob(async b=>{if(!b)return;vib(15);last=new File([b],`ev-${Date.now()}.jpg`,{type:"image/jpeg"});try{(await caches.open("ev-photos")).put(new Request("./photos/"+last.name),new Response(b))}catch{}say("Image saved.")},"image/jpeg",.92)}
+async function share(){if(!last)return say("No image captured yet.");
+if(!navigator.userActivation?.isActive)return say("Tap the share button to confirm.");
+try{if(navigator.canShare?.({files:[last]}))await navigator.share({files:[last],title:"E.V. capture"});else{const a=document.createElement("a");a.href=URL.createObjectURL(last);a.download=last.name;a.click()}}catch{}}
+/* ---------- panels & back button ---------- */
+const stack=[];
+function openL(n){if(stack.includes(n))return;stack.push(n);$("#"+n).classList.add("on");history.pushState({n},"")}
+addEventListener("popstate",()=>{const n=stack.pop();if(n)$("#"+n).classList.remove("on")});
+document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>stack.length&&history.back());
+$("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
+$("#b-th").onclick=()=>setN(!st.nv);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
+$("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-ph").onclick=photo;$("#b-sh").onclick=share;
+/* ---------- settings ---------- */
+const sync=()=>{$("#s-voice").value=S.voice;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
+sync();
+$("#s-voice").onchange=e=>{S.voice=e.target.value;save();sync();pauseRec();want=S.voice==="wake"&&st.run;startRec()};
+$("#s-tts").onchange=e=>{S.tts=e.target.checked;save()};$("#s-hap").onchange=e=>{S.hap=e.target.checked;save()};
+$("#s-bat").onchange=e=>{S.saver=e.target.checked;save();document.body.classList.toggle("noglow",S.saver||adapt>1)};
+$("#ptt").addEventListener("pointerdown",()=>{want=true;startRec()});
+$("#ptt").addEventListener("pointerup",()=>{want=false;rec&&rec.stop()});
+/* ---------- lifecycle & install ---------- */
+async function start(){await cam();await wlock();if(st.nv)setN(true,1);st.run=true;want=S.voice==="wake";startRec();cancelAnimationFrame(st.raf);st.raf=requestAnimationFrame(tick)}
+function stop(){st.run=false;cancelAnimationFrame(st.raf);want=false;pauseRec();window.speechSynthesis?.cancel();stream?.getTracks().forEach(t=>t.stop());stream=null;prev=null}
+document.addEventListener("visibilitychange",async()=>{if(!st.booted)return;if(document.hidden)stop();else{document.body.classList.add("recon");try{await start()}catch{cap("Camera link failed.")}setTimeout(()=>document.body.classList.remove("recon"),1300);say("Link restored.")}});
+const isApp=()=>["standalone","fullscreen"].some(m=>matchMedia(`(display-mode: ${m})`).matches);
+const hideInst=()=>{$("#inst").hidden=true};
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;if(!isApp())$("#inst").hidden=false});
+addEventListener("appinstalled",hideInst);
+$("#inst").onclick=async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;hideInst()};
+if(isApp())hideInst();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+$("#go").onclick=async()=>{try{await document.documentElement.requestFullscreen({navigationUI:"hide"})}catch{}
+try{await screen.orientation.lock("landscape")}catch{}
+try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>say("E.V. online. Say E.V., then a command."))}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
+</script></body></html>
