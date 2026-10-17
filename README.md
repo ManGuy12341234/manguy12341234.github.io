@@ -32,3 +32,6 @@ Then `npx cap sync android`, `npx cap open android`, and in Android Studio choos
 
 ## C. APK via PWABuilder (recommended, free, no Play Store account)
 Runs on Chrome itself (a Trusted Web Activity), so voice keeps working, unlike the Capacitor route. For a fullscreen app with no address bar, the site must live at the root of `yourusername.github.io` and serve `/.well-known/assetlinks.json` (plus an empty `.nojekyll` file so GitHub Pages serves dot-folders). Package it at pwabuilder.com -> Package for stores -> Android, with a new signing key, then sideload the signed APK. Keep the keystore: you need it to update the APK later.
+
+## D. AI brain (answers questions, describes the camera view)
+Open TOOLS -> SETTINGS and paste an Anthropic API key (console.anthropic.com -> API keys). The key is stored only on the phone, never in the repository. Usage is billed to your API account, separately from any Claude.ai plan, so set a monthly spend limit there. Say "E.V., what is ..." for questions, or "E.V., tell me what I'm looking at" to send the camera view with the question.
