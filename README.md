@@ -9,7 +9,11 @@ Files: `index.html`, `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.
 4. Allow Camera and Microphone when asked. Compass and battery need no prompt.
 5. After updating files, bump `V` in `sw.js` (e.g. `ev-v2`) so phones pick up the change.
 
-Voice: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., thermal", "E.V., photo", "E.V., share", "E.V., battery", "E.V., settings". Sharing by voice needs a tap to confirm (Android requires a user gesture for the share sheet).
+Voice: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., holo view", "E.V., night vision", "E.V., scan", "E.V., spider sense off", "E.V., battery", "E.V., settings".
+
+Night vision brightens the camera view in green with a scanline look. Scan pulse sends out a ring, buzzes once per detected object and reads out what it found. Spider-Sense buzzes the phone harder and longer the more movement or the bigger the object in view; turn Haptics on in Settings if it stays silent.
+
+Without an API key, E.V. still answers facts (from Wikipedia, needs internet), math, the time and what her object detector sees. Add a key under TOOLS -> SETTINGS for full conversation.
 
 ## B. Optional APK via Capacitor (sideload, no Play Store)
 ```

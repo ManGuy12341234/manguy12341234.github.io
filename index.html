@@ -33,17 +33,19 @@ button.on{background:var(--c);color:#000}
 body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-rotate(60deg)}100%{filter:none}}
 .noglow *{text-shadow:none!important;box-shadow:none!important}
 #ed{display:none;mix-blend-mode:screen}body.holo #ed{display:block}body.holo #v{filter:brightness(.3) saturate(.3) contrast(1.2)}body.holo #stage::after{content:"";position:absolute;left:0;right:0;top:-20%;height:20%;background:linear-gradient(transparent,rgba(61,242,255,.28),transparent);pointer-events:none;animation:hs 3s linear infinite}@keyframes hs{to{top:100%}}
+body.nv #v{filter:grayscale(1) brightness(2.3) contrast(1.35) sepia(1) hue-rotate(70deg) saturate(4)}body.nv #stage::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);box-shadow:inset 0 0 120px 30px rgba(0,0,0,.65)}
+#pulse{position:absolute;left:50%;top:50%;width:10vmin;height:10vmin;margin:-5vmin 0 0 -5vmin;border:2px solid var(--c);border-radius:50%;opacity:0;pointer-events:none}#pulse.go{animation:pl 1.3s ease-out}@keyframes pl{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(9)}}
 [hidden]{display:none!important}
 </style></head><body>
 <div id="stage"><video id="v" playsinline muted></video><canvas id="ed" width="320" height="180"></canvas><canvas id="ov"></canvas></div>
 <div id="hud"><div id="top"><span id="bat">BAT --</span><span id="hd">HDG ---°</span><span id="fps">-- FPS</span><span id="st">STANDBY</span></div>
-<div id="ret"></div><canvas id="rad" width="300" height="300"></canvas><div id="cap">E.V. standing by.</div><div id="ss"></div>
+<div id="ret"></div><canvas id="rad" width="300" height="300"></canvas><div id="cap">E.V. standing by.</div><div id="ss"></div><div id="pulse"></div>
 <button id="ptt" hidden>HOLD</button><button id="menu">☰ TOOLS</button></div>
-<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ho">HOLO VIEW</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-ph">PHOTO</button><button id="b-sh">SHARE LAST</button><button id="b-se">SETTINGS</button></div>
+<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ho">HOLO VIEW</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-nv">NIGHT VISION</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
-<label>API key<input id="s-key" type="password" placeholder="sk-ant-..." autocomplete="off"></label><label>Model<input id="s-model" type="text" placeholder="claude-haiku-5-5"></label><small>Your key stays on this phone only. Never put it in GitHub. Questions are billed to your Anthropic API account, so set a monthly spend limit in the Anthropic Console. When you ask about what the camera sees, one photo is sent to Anthropic.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<label>API key<input id="s-key" type="password" placeholder="sk-ant-..." autocomplete="off"></label><label>Model<input id="s-model" type="text" placeholder="claude-haiku-5-5"></label><small>Your key stays on this phone only. Never put it in GitHub. Questions are billed to your Anthropic API account, so set a monthly spend limit in the Anthropic Console. When you ask about what the camera sees, one camera frame is sent to Anthropic.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
 <div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button></div>
@@ -53,8 +55,8 @@ const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
 const S={voice:"wake",saver:false,hap:true,tts:true,key:"",model:"claude-haiku-5-5"};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
-const st={run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
-let stream,track,caps={},det,wl,deferred,bat,last,warned=0,infMs=100,adapt=0,low=0,frames=0,t0=performance.now(),lastInf=0,lastAlert=0,prev,skip=0;
+const st={nv:false,run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
+let stream,track,caps={},det,wl,deferred,bat,warned=0,infMs=100,adapt=0,low=0,frames=0,t0=performance.now(),lastInf=0,lastAlert=0,prev,skip=0;
 const MODEL="https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",MP="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/";
 const vib=p=>{if(S.hap&&navigator.vibrate)try{navigator.vibrate(p)}catch{}};
 const cap=t=>{$("#cap").textContent=t};
@@ -81,16 +83,16 @@ if(/^(flash ?light|torch)( on| off)?$|^(on|off) (flash ?light|torch)$/.test(k))r
 if(m=k.match(/^zoom (\d) ?x?$/))return zoom(+m[1]);if(/^zoom (out|reset)$/.test(k))return zoom(1);
 if(/^(holo|hologram|wireframe)( view| vision| mode)?( on| off)?$|^(on|off) (holo|wireframe)( view)?$/.test(k))return setHolo(!/off/.test(k));
 if(/^spider.?sense( on| off)?$|^(on|off) spider.?sense$/.test(k)){st.sense=!/off/.test(k);$("#b-ss").classList.toggle("on",st.sense);return say("Spider-Sense "+(st.sense?"active":"disabled"))}
-if(/^(take |capture |snap )?(a )?(photo|picture|image)$/.test(k))return photo();
-if(/^share( it| last)?$/.test(k))return share();
+if(/^(night ?vision|night mode)( on| off)?$|^(on|off) night ?(vision|mode)$/.test(k))return setNV(!/off/.test(k));
+if(/^(scan|ping|sweep)( area| around| surroundings)?$/.test(k))return scan();
 if(/^(battery|power|status)( level| status)?$/.test(k))return say(bat?`Power at ${Math.round(bat.level*100)} percent${bat.charging?", charging":""}.`:"Power telemetry unavailable.");
 ask(c,VIS.test(c))}
 function frame(){const w=Math.min(1024,V.videoWidth),c=document.createElement("canvas");c.width=w;c.height=Math.round(w*V.videoHeight/V.videoWidth);const x=c.getContext("2d");x.drawImage(V,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.7).split(",")[1]}
 const SYS="You are E.V., a voice assistant inside a heads-up display on the user's phone. Your reply is spoken aloud, so use plain conversational sentences: no markdown, lists, emoji or symbols. Keep answers to one to three sentences unless the user asks for more detail. When a camera image is attached, answer from what is visible and say so if you cannot tell. Do not identify people from their faces. If you are unsure, say so briefly.";
 let ctl;
 async function ask(q,img){
-if(!S.key){say("I need an API key before I can answer. Add one under Tools, then Settings.");return}
 if(st.busy)return;
+if(!S.key)return local(q,img);
 if(!navigator.onLine){say("I'm offline, so I can't reach my brain.");vib(400);return}
 if(img&&(!stream||V.readyState<2))img=false;
 st.busy=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
@@ -104,6 +106,39 @@ st.hist.push({role:"user",content:img?"[camera image] "+q:q},{role:"assistant",c
 st.follow=true;say(a)}
 catch(e){say(e.name==="AbortError"?"That took too long.":e.message==="Failed to fetch"?"I couldn't reach the AI.":e.message.length<160?e.message:"Something went wrong reaching the AI.");vib(400)}
 finally{clearTimeout(to);st.busy=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
+/* ---------- built-in brain (no API key needed) ---------- */
+async function local(q,img){
+st.busy=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
+try{const a=await offline(q,img);st.follow=true;say(a)}
+catch{say("I couldn't work that out.");vib(400)}
+finally{st.busy=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
+async function offline(q,img){
+const s=q.toLowerCase().replace(/[?!]/g,"").replace(/\s+/g," ").trim(),n=new Date();
+if(/^(hi|hello|hey)$/.test(s))return "Online and listening.";
+if(/^(who|what) are you$|^what'?s your name$/.test(s))return "I'm E.V., the voice assistant in your suit interface.";
+if(/^how are you/.test(s))return "All systems nominal.";
+if(/^(what('?s| is)( the)? (time|date|day)|what time|what day|what'?s today|today'?s date)/.test(s)){
+if(/date|day|today/.test(s))return "Today is "+n.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric",year:"numeric"})+".";
+return "It is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+"."}
+const e=s.replace(/^(what('?s| is)|calculate|compute|how much is|solve)\s+/,"").replace(/\b(multiplied by|times|x)\b/g,"*").replace(/\b(divided by|over)\b/g,"/").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-").replace(/\s+/g," ").trim();
+if(/^[\d\s.+\-*\/()%]+$/.test(e)&&/\d\s*[-+*\/%]\s*\d/.test(e)){try{const r=Function('"use strict";return ('+e+')')();if(Number.isFinite(r))return "The answer is "+(+r.toFixed(6))+"."}catch{}}
+if(img){
+if(!det)return "My targeting system isn't loaded yet, so I can't tell what's in view.";
+if(!st.boxes.length)return "I don't recognize anything specific in view right now.";
+const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);
+const l=Object.entries(c).map(([k,v])=>v>1?v+" "+k+"s":"a "+k);
+return "I can see "+(l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:l[0])+"."}
+const t=s.replace(/^(what('?s| is| are| was| were| does)|who('?s| is| was| were)|where('?s| is)|when (was|is|did)|tell me about|explain|define|how does|how do)\s+/,"").replace(/^(a|an|the)\s+/,"").replace(/\s+mean$/,"").trim();
+if(t===s||t.length<2)return "I can handle facts, math, the time and what my sensors see. Open-ended conversation is beyond me right now.";
+if(!navigator.onLine)return "I'm offline, so I can only help with the time, math and what I can see.";
+const ac=new AbortController(),to=setTimeout(()=>ac.abort(),8000);
+try{const j=await(await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&generator=search&gsrlimit=1&prop=extracts&exintro=1&explaintext=1&exsentences=2&gsrsearch="+encodeURIComponent(t),{signal:ac.signal})).json();
+const p=j.query&&Object.values(j.query.pages)[0];
+const x=((p&&p.extract)||"").replace(/\s*\([^)]*\)/g,"").replace(/\s+/g," ").trim();
+if(!x||/may (also )?refer to/.test(x))return "I couldn't find a clear answer about "+t+".";
+return x}
+catch{return "I couldn't reach my knowledge base."}
+finally{clearTimeout(to)}}
 /* ---------- camera & device ---------- */
 async function cam(){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});
 V.srcObject=stream;await V.play();track=stream.getVideoTracks()[0];caps=track.getCapabilities?track.getCapabilities():{};
@@ -117,7 +152,7 @@ function holo(){hx.drawImage(V,0,0,320,180);const p=hx.getImageData(0,0,320,180)
 for(let i=0,j=0;i<57600;i++,j+=4)G[i]=(p[j]*77+p[j+1]*150+p[j+2]*29)>>8;
 for(let y=1;y<179;y++)for(let x=1;x<319;x++){const i=y*320+x,gx=G[i-319]+2*G[i+1]+G[i+321]-G[i-321]-2*G[i-1]-G[i+319],gy=G[i+319]+2*G[i+320]+G[i+321]-G[i-321]-2*G[i-320]-G[i-319],m=Math.abs(gx)+Math.abs(gy);if(m>60){const j=i*4;q[j]=61;q[j+1]=242;q[j+2]=255;q[j+3]=Math.min(255,(m-60)*2.2)}}
 ex.putImageData(O,0,0)}
-function setHolo(on){st.holo=on;document.body.classList.toggle("holo",on);$("#b-ho").classList.toggle("on",on);if(!on)ex.clearRect(0,0,320,180);say("Holo view "+(on?"online":"off"))}
+function setHolo(on){if(on&&st.nv)setNV(false,1);st.holo=on;document.body.classList.toggle("holo",on);$("#b-ho").classList.toggle("on",on);if(!on)ex.clearRect(0,0,320,180);say("Holo view "+(on?"online":"off"))}
 const wlock=async()=>{try{wl=await navigator.wakeLock.request("screen")}catch{}};
 addEventListener("deviceorientationabsolute",e=>{if(e.alpha==null)return;st.heading=(360-e.alpha+(screen.orientation?.angle||0))%360;$("#hd").textContent="HDG "+String(Math.round(st.heading)).padStart(3,"0")+"°"});
 navigator.getBattery?.().then(b=>{bat=b;const u=()=>{$("#bat").textContent=`BAT ${Math.round(b.level*100)}%${b.charging?" ⚡":""}`;if(b.level<=.2&&!b.charging&&!warned){warned=1;vib(400);say("Suit power low.")}if(b.level>.25)warned=0};b.addEventListener("levelchange",u);b.addEventListener("chargingchange",u);u()});
@@ -139,7 +174,7 @@ for(let i=0,p=0;i<n;i++,p+=4){const y=(d[p]*77+d[p+1]*150+d[p+2]*29)>>8;L[i]=y;i
 const m=prev?mv/n:0;prev=L;let tgt=m>.6?0:Math.min(1,m*6);
 const big=st.boxes.reduce((a,b)=>Math.max(a,b.w*b.h/(V.videoWidth*V.videoHeight)),0);if(big>.25)tgt=Math.max(tgt,Math.min(1,(big-.25)*2.5));
 st.I=st.I*.8+(st.sense?tgt:0)*.2;$("#ss").style.opacity=st.I>.2?Math.min(1,st.I):0;
-if(st.I>.35&&Date.now()-lastAlert>900-600*st.I){lastAlert=Date.now();const p=[],k=Math.ceil(st.I*3);for(let i=0;i<k;i++)p.push(25+st.I*60,45);vib(p)}}
+if(st.I>.2){const k=Math.ceil(st.I*3),on=90+Math.round(st.I*150),p=[],dur=k*(on+60);for(let i=0;i<k;i++)p.push(on,60);if(Date.now()-lastAlert>dur+120){lastAlert=Date.now();vib(p)}}}
 function draw(ts){ox.clearRect(0,0,OV.width,OV.height);const cx=OV.width/2,cy=OV.height/2;let best,bd=1e9;
 ox.lineWidth=Math.max(2,OV.width/400);ox.font=`${Math.round(OV.width/55)}px monospace`;
 for(const b of st.boxes){const dx=b.x+b.w/2-cx,dy=b.y+b.h/2-cy,dd=Math.hypot(dx,dy);if(dd<bd){bd=dd;best=b}}
@@ -152,12 +187,15 @@ if(st.heading!=null){const h=-st.heading*Math.PI/180;rx.globalAlpha=1;rx.fillTex
 rx.fillStyle="#ff3d5a";rx.globalAlpha=1;const z=parseFloat($("#stage").style.transform.replace(/\D/g,""))||1;
 for(const b of st.boxes){const ar=b.w*b.h/(V.videoWidth*V.videoHeight),br=((b.x+b.w/2)/V.videoWidth-.5)*66*Math.PI/180/z,r=Math.max(.2,Math.min(.95,1.05-Math.sqrt(ar)*1.6))*(R-8);
 rx.beginPath();rx.arc(R+Math.sin(br)*r,R-Math.cos(br)*r,7,0,7);rx.fill()}}
-/* ---------- photo / share ---------- */
-function photo(){const c=document.createElement("canvas");c.width=V.videoWidth;c.height=V.videoHeight;const x=c.getContext("2d");if(st.holo)x.filter="brightness(.3) saturate(.3) contrast(1.2)";x.drawImage(V,0,0,c.width,c.height);x.filter="none";if(st.holo){x.globalCompositeOperation="screen";x.drawImage(ED,0,0,c.width,c.height);x.globalCompositeOperation="source-over"}x.drawImage(OV,0,0);
-c.toBlob(async b=>{if(!b)return;vib(15);last=new File([b],`ev-${Date.now()}.jpg`,{type:"image/jpeg"});try{(await caches.open("ev-photos")).put(new Request("./photos/"+last.name),new Response(b))}catch{}say("Image saved.")},"image/jpeg",.92)}
-async function share(){if(!last)return say("No image captured yet.");
-if(!navigator.userActivation?.isActive)return say("Tap the share button to confirm.");
-try{if(navigator.canShare?.({files:[last]}))await navigator.share({files:[last],title:"E.V. capture"});else{const a=document.createElement("a");a.href=URL.createObjectURL(last);a.download=last.name;a.click()}}catch{}}
+/* ---------- night vision / scan pulse ---------- */
+function setNV(on,q){if(on&&st.holo)setHolo(false);st.nv=on;document.body.classList.toggle("nv",on);$("#b-nv").classList.toggle("on",on);if(!q)say("Night vision "+(on?"online":"off"))}
+function scan(){const p=$("#pulse");p.classList.remove("go");void p.offsetWidth;p.classList.add("go");
+if(!det){vib([60,40,60]);return say("Targeting isn't loaded yet, so I can't scan.")}
+const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);const e=Object.entries(c),n=st.boxes.length;
+if(!n){vib(60);return say("Scan complete. No targets in range.")}
+const v=[];for(let i=0;i<Math.min(n,6);i++)v.push(70,90);vib(v);
+const l=e.map(([k,x])=>x>1?x+" "+k+"s":k);
+say("Scan complete. "+n+(n>1?" targets: ":" target: ")+(l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:l[0])+".")}
 /* ---------- panels & back button ---------- */
 const stack=[];
 function openL(n){if(stack.includes(n))return;stack.push(n);$("#"+n).classList.add("on");history.pushState({n},"")}
@@ -165,7 +203,7 @@ addEventListener("popstate",()=>{const n=stack.pop();if(n)$("#"+n).classList.rem
 document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>stack.length&&history.back());
 $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
-$("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-ph").onclick=photo;$("#b-sh").onclick=share;
+$("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-nv").onclick=()=>setNV(!st.nv);$("#b-sc").onclick=scan;
 /* ---------- settings ---------- */
 const sync=()=>{$("#s-voice").value=S.voice;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#s-key").value=S.key;$("#s-model").value=S.model;$("#ptt").hidden=S.voice!=="hold"};
 sync();
