@@ -94,7 +94,7 @@ if(/^(battery|power|status)( level| status)?$/.test(k))return say(bat?`Power at 
 ask(c,VIS.test(c))}
 function frame(){const w=Math.min(1024,V.videoWidth),c=document.createElement("canvas");c.width=w;c.height=Math.round(w*V.videoHeight/V.videoWidth);const x=c.getContext("2d");x.drawImage(V,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.7).split(",")[1]}
 const SYS="You are E.V., a voice assistant inside a heads-up display on the user's phone. Your reply is spoken aloud, so use plain conversational sentences: no markdown, lists, emoji or symbols. Keep answers to one to three sentences unless the user asks for more detail. When a camera image is attached, answer from what is visible and say so if you cannot tell. Do not identify people from their faces. If you are unsure, say so briefly.";
-let ctl;
+let ctl,gep;
 const isClaude=()=>/^sk-ant/.test(S.key);
 async function llm({sys,q,img,hist=[],max=1024,json=false,signal}){
 let r,j;
@@ -106,9 +106,17 @@ if(!r.ok)throw new Error(r.status===401?"That key was rejected. Check it in sett
 return(j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ")}
 const parts=[];if(img)parts.push({inlineData:{mimeType:"image/jpeg",data:img}});parts.push({text:q});
 const gc={maxOutputTokens:max};if(json)gc.responseMimeType="application/json";
-r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+(/^gemini/.test(S.model)?S.model:"gemini-flash-latest")+":generateContent",{method:"POST",signal,headers:{"content-type":"application/json","x-goog-api-key":S.key},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[...hist.map(h=>({role:h.role==="assistant"?"model":"user",parts:[{text:h.content}]})),{role:"user",parts}],generationConfig:gc})});
-j=await r.json();
-if(!r.ok){const m=(j.error&&j.error.message)||"";throw new Error(r.status===429?"I'm being rate limited. Try again in a moment.":(r.status===401||r.status===403||/api key/i.test(m))?"That key was rejected. Check it in settings.":m||"Request failed.")}
+const body=JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[...hist.map(h=>({role:h.role==="assistant"?"model":"user",parts:[{text:h.content}]})),{role:"user",parts}],generationConfig:gc});
+const gm=/^gemini/.test(S.model)?S.model:"",order=gep?[gep,gep==="a"?"v":"a"]:/^AQ\./.test(S.key)?["v","a"]:["a","v"],errs=[];
+for(const e of order){
+const url=e==="a"?"https://generativelanguage.googleapis.com/v1beta/models/"+(gm||"gemini-flash-latest")+":generateContent":"https://aiplatform.googleapis.com/v1/publishers/google/models/"+(gm||"gemini-2.5-flash")+":generateContent?key="+encodeURIComponent(S.key);
+let x,y;
+try{x=await fetch(url,{method:"POST",signal,headers:e==="a"?{"content-type":"application/json","x-goog-api-key":S.key}:{"content-type":"application/json"},body});y=await x.json()}
+catch(err){if(err.name==="AbortError")throw err;errs.push((e==="a"?"AI Studio":"Vertex")+": network");continue}
+if(x.ok){gep=e;j=y;break}
+if(x.status===429)throw new Error("I'm being rate limited. Try again in a moment.");
+errs.push((e==="a"?"AI Studio":"Vertex")+": "+(((y.error&&y.error.message)||"HTTP "+x.status)+"").slice(0,55))}
+if(!j){if(errs.every(z=>/network$/.test(z)))throw new Error("Failed to fetch");throw new Error(("Key rejected. "+errs.join(" | ")).slice(0,155))}
 if(j.promptFeedback&&j.promptFeedback.blockReason)throw new Error("I can't answer that one.");
 const c=j.candidates&&j.candidates[0];
 return((c&&c.content&&c.content.parts)||[]).filter(x=>x.text).map(x=>x.text).join(" ")}
