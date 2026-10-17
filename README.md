@@ -9,9 +9,9 @@ Files: `index.html`, `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.
 4. Allow Camera and Microphone when asked. Compass and battery need no prompt.
 5. After updating files, bump `V` in `sw.js` (e.g. `ev-v2`) so phones pick up the change.
 
-Voice: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., holo view", "E.V., night vision", "E.V., scan", "E.V., spider sense off", "E.V., battery", "E.V., settings".
+Voice: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., holo view", "E.V., deep scan", "E.V., scan", "E.V., spider sense off", "E.V., battery", "E.V., settings".
 
-Night vision brightens the camera view in green with a scanline look. Scan pulse sends out a ring, buzzes once per detected object and reads out what it found. Spider-Sense buzzes the phone harder and longer the more movement or the bigger the object in view; turn Haptics on in Settings if it stays silent.
+Deep scan (needs an AI key): sends one camera frame to the AI, which picks out the most notable objects, signs and text. E.V. draws amber targeting brackets with a label and a short note on each one, pinned over the live view for about 15 seconds, lists them in the text box and reads out what she found. Scan pulse is the offline version: a ring, one buzz per object the on-phone detector sees, and a spoken summary. Spider-Sense buzzes the phone harder and longer the more movement or the bigger the object in view; keep Haptics on in Settings.
 
 Without an API key, E.V. still answers facts (from Wikipedia, needs internet), math, the time and what her object detector sees. Add a key under TOOLS -> SETTINGS for full conversation.
 
@@ -37,5 +37,9 @@ Then `npx cap sync android`, `npx cap open android`, and in Android Studio choos
 ## C. APK via PWABuilder (recommended, free, no Play Store account)
 Runs on Chrome itself (a Trusted Web Activity), so voice keeps working, unlike the Capacitor route. For a fullscreen app with no address bar, the site must live at the root of `yourusername.github.io` and serve `/.well-known/assetlinks.json` (plus an empty `.nojekyll` file so GitHub Pages serves dot-folders). Package it at pwabuilder.com -> Package for stores -> Android, with a new signing key, then sideload the signed APK. Keep the keystore: you need it to update the APK later.
 
-## D. AI brain (answers questions, describes the camera view)
-Open TOOLS -> SETTINGS and paste an Anthropic API key (console.anthropic.com -> API keys). The key is stored only on the phone, never in the repository. Usage is billed to your API account, separately from any Claude.ai plan, so set a monthly spend limit there. Say "E.V., what is ..." for questions, or "E.V., tell me what I'm looking at" to send the camera view with the question.
+## D. AI brain (answers questions, describes the camera view, deep scan)
+Open TOOLS -> SETTINGS and paste a key. Two kinds work, and E.V. detects which one you pasted:
+- **Google Gemini** (aistudio.google.com -> Get API key). Uses `gemini-flash-latest` unless you type a different `gemini-...` model name in the Model box.
+- **Anthropic** (console.anthropic.com -> API keys, starts with `sk-ant-`). Uses `claude-haiku-5-5` unless you type another `claude-...` model.
+
+The key is stored only on the phone, never in the repository, so do not paste it into any file you upload. Usage is billed to your account with that provider, so set a spending limit there. Say "E.V., what is ..." for questions, or "E.V., tell me what I'm looking at" to send the camera view with the question.

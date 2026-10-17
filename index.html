@@ -18,7 +18,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--c);font:12px var
 #ret.lock{border-color:var(--r);border-width:2px;transform:translate(-50%,-50%) scale(.85);box-shadow:0 0 18px var(--r)}
 #rad{position:absolute;left:14px;bottom:14px;width:26vmin;height:26vmin;max-width:150px;max-height:150px}
 #cap{pointer-events:auto;position:absolute;left:calc(26vmin + 30px);bottom:16px;right:90px;max-height:36vh;overflow:auto;line-height:1.3;font-size:14px;padding:8px 10px;background:rgba(2,10,16,.72);border:1px solid rgba(61,242,255,.4);border-radius:6px}
-#ss{position:absolute;inset:0;opacity:0;box-shadow:inset 0 0 90px 24px var(--r);transition:opacity .1s}
+#cap{white-space:pre-line}#ss{position:absolute;inset:0;opacity:0;box-shadow:inset 0 0 90px 24px var(--r);transition:opacity .1s}
 #menu,#ptt{position:absolute;right:14px;pointer-events:auto}
 #menu{top:40px}#ptt{bottom:16px;width:64px;height:64px;border-radius:50%}
 button,select,input:not([type=checkbox]){font:inherit;color:var(--c);background:rgba(2,16,24,.7);border:1px solid var(--c);padding:10px 14px;border-radius:6px;letter-spacing:.1em;pointer-events:auto}
@@ -33,7 +33,6 @@ button.on{background:var(--c);color:#000}
 body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-rotate(60deg)}100%{filter:none}}
 .noglow *{text-shadow:none!important;box-shadow:none!important}
 #ed{display:none;mix-blend-mode:screen}body.holo #ed{display:block}body.holo #v{filter:brightness(.3) saturate(.3) contrast(1.2)}body.holo #stage::after{content:"";position:absolute;left:0;right:0;top:-20%;height:20%;background:linear-gradient(transparent,rgba(61,242,255,.28),transparent);pointer-events:none;animation:hs 3s linear infinite}@keyframes hs{to{top:100%}}
-body.nv #v{filter:grayscale(1) brightness(2.3) contrast(1.35) sepia(1) hue-rotate(70deg) saturate(4)}body.nv #stage::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);box-shadow:inset 0 0 120px 30px rgba(0,0,0,.65)}
 #pulse{position:absolute;left:50%;top:50%;width:10vmin;height:10vmin;margin:-5vmin 0 0 -5vmin;border:2px solid var(--c);border-radius:50%;opacity:0;pointer-events:none}#pulse.go{animation:pl 1.3s ease-out}@keyframes pl{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(9)}}
 [hidden]{display:none!important}
 </style></head><body>
@@ -41,21 +40,21 @@ body.nv #v{filter:grayscale(1) brightness(2.3) contrast(1.35) sepia(1) hue-rotat
 <div id="hud"><div id="top"><span id="bat">BAT --</span><span id="hd">HDG ---°</span><span id="fps">-- FPS</span><span id="st">STANDBY</span></div>
 <div id="ret"></div><canvas id="rad" width="300" height="300"></canvas><div id="cap">E.V. standing by.</div><div id="ss"></div><div id="pulse"></div>
 <button id="ptt" hidden>HOLD</button><button id="menu">☰ TOOLS</button></div>
-<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ho">HOLO VIEW</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-nv">NIGHT VISION</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
+<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ho">HOLO VIEW</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-dp">DEEP SCAN · AI</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
-<label>API key<input id="s-key" type="password" placeholder="sk-ant-..." autocomplete="off"></label><label>Model<input id="s-model" type="text" placeholder="claude-haiku-5-5"></label><small>Your key stays on this phone only. Never put it in GitHub. Questions are billed to your Anthropic API account, so set a monthly spend limit in the Anthropic Console. When you ask about what the camera sees, one camera frame is sent to Anthropic.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<label>API key<input id="s-key" type="password" placeholder="Gemini or Claude key" autocomplete="off"></label><label>Model<input id="s-model" type="text" placeholder="auto"></label><small>Paste a Google Gemini key or an Anthropic key (sk-ant-...); E.V. detects which one it is. Your key stays on this phone only. Never put it in GitHub. Questions are billed to your account with that provider, so set a spending limit there. When you ask about what the camera sees, or use Deep Scan, one camera frame is sent to the provider.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
 <div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
-const S={voice:"wake",saver:false,hap:true,tts:true,key:"",model:"claude-haiku-5-5"};
+const S={voice:"wake",saver:false,hap:true,tts:true,key:"",model:""};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
-const st={nv:false,run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
+const st={tags:[],run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
 let stream,track,caps={},det,wl,deferred,bat,warned=0,infMs=100,adapt=0,low=0,frames=0,t0=performance.now(),lastInf=0,lastAlert=0,prev,skip=0;
 const MODEL="https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",MP="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/";
 const vib=p=>{if(S.hap&&navigator.vibrate)try{navigator.vibrate(p)}catch{}};
@@ -83,13 +82,31 @@ if(/^(flash ?light|torch)( on| off)?$|^(on|off) (flash ?light|torch)$/.test(k))r
 if(m=k.match(/^zoom (\d) ?x?$/))return zoom(+m[1]);if(/^zoom (out|reset)$/.test(k))return zoom(1);
 if(/^(holo|hologram|wireframe)( view| vision| mode)?( on| off)?$|^(on|off) (holo|wireframe)( view)?$/.test(k))return setHolo(!/off/.test(k));
 if(/^spider.?sense( on| off)?$|^(on|off) spider.?sense$/.test(k)){st.sense=!/off/.test(k);$("#b-ss").classList.toggle("on",st.sense);return say("Spider-Sense "+(st.sense?"active":"disabled"))}
-if(/^(night ?vision|night mode)( on| off)?$|^(on|off) night ?(vision|mode)$/.test(k))return setNV(!/off/.test(k));
+if(/^(deep scan|analy[sz]e|analysis|full scan)( area| this| scene| view| surroundings)?$/.test(k))return deep();
 if(/^(scan|ping|sweep)( area| around| surroundings)?$/.test(k))return scan();
 if(/^(battery|power|status)( level| status)?$/.test(k))return say(bat?`Power at ${Math.round(bat.level*100)} percent${bat.charging?", charging":""}.`:"Power telemetry unavailable.");
 ask(c,VIS.test(c))}
 function frame(){const w=Math.min(1024,V.videoWidth),c=document.createElement("canvas");c.width=w;c.height=Math.round(w*V.videoHeight/V.videoWidth);const x=c.getContext("2d");x.drawImage(V,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.7).split(",")[1]}
 const SYS="You are E.V., a voice assistant inside a heads-up display on the user's phone. Your reply is spoken aloud, so use plain conversational sentences: no markdown, lists, emoji or symbols. Keep answers to one to three sentences unless the user asks for more detail. When a camera image is attached, answer from what is visible and say so if you cannot tell. Do not identify people from their faces. If you are unsure, say so briefly.";
 let ctl;
+const isClaude=()=>/^sk-ant/.test(S.key);
+async function llm({sys,q,img,hist=[],max=1024,json=false,signal}){
+let r,j;
+if(isClaude()){
+const content=img?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:img}},{type:"text",text:q}]:q;
+r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal,headers:{"content-type":"application/json","x-api-key":S.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:/^claude/.test(S.model)?S.model:"claude-haiku-5-5",max_tokens:max,system:sys,messages:[...hist,{role:"user",content}]})});
+j=await r.json();
+if(!r.ok)throw new Error(r.status===401?"That key was rejected. Check it in settings.":r.status===429?"I'm being rate limited. Try again in a moment.":(j.error&&j.error.message)||"Request failed.");
+return(j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ")}
+const parts=[];if(img)parts.push({inlineData:{mimeType:"image/jpeg",data:img}});parts.push({text:q});
+const gc={maxOutputTokens:max};if(json)gc.responseMimeType="application/json";
+r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+(/^gemini/.test(S.model)?S.model:"gemini-flash-latest")+":generateContent",{method:"POST",signal,headers:{"content-type":"application/json","x-goog-api-key":S.key},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[...hist.map(h=>({role:h.role==="assistant"?"model":"user",parts:[{text:h.content}]})),{role:"user",parts}],generationConfig:gc})});
+j=await r.json();
+if(!r.ok){const m=(j.error&&j.error.message)||"";throw new Error(r.status===429?"I'm being rate limited. Try again in a moment.":(r.status===401||r.status===403||/api key/i.test(m))?"That key was rejected. Check it in settings.":m||"Request failed.")}
+if(j.promptFeedback&&j.promptFeedback.blockReason)throw new Error("I can't answer that one.");
+const c=j.candidates&&j.candidates[0];
+return((c&&c.content&&c.content.parts)||[]).filter(x=>x.text).map(x=>x.text).join(" ")}
+const aiErr=e=>e.name==="AbortError"?"That took too long.":e.message==="Failed to fetch"?"I couldn't reach the AI.":e.message.length<160?e.message:"Something went wrong reaching the AI.";
 async function ask(q,img){
 if(st.busy)return;
 if(!S.key)return local(q,img);
@@ -97,14 +114,10 @@ if(!navigator.onLine){say("I'm offline, so I can't reach my brain.");vib(400);re
 if(img&&(!stream||V.readyState<2))img=false;
 st.busy=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
 ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),30000);
-const content=img?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:frame()}},{type:"text",text:q}]:q;
-try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:ctl.signal,headers:{"content-type":"application/json","x-api-key":S.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:S.model||"claude-haiku-5-5",max_tokens:500,system:SYS,messages:[...st.hist,{role:"user",content}]})});
-const j=await r.json();
-if(!r.ok)throw new Error(r.status===401?"That key was rejected. Check it in settings.":r.status===429?"I'm being rate limited. Try again in a moment.":(j.error&&j.error.message)||"Request failed.");
-const a=(j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ").replace(/[*#_`]/g,"").trim()||"I have no answer for that.";
+try{const a=(await llm({sys:SYS,q,img:img?frame():null,hist:st.hist,max:1024,signal:ctl.signal})).replace(/[*#_`]/g,"").trim()||"I have no answer for that.";
 st.hist.push({role:"user",content:img?"[camera image] "+q:q},{role:"assistant",content:a});st.hist=st.hist.slice(-8);
 st.follow=true;say(a)}
-catch(e){say(e.name==="AbortError"?"That took too long.":e.message==="Failed to fetch"?"I couldn't reach the AI.":e.message.length<160?e.message:"Something went wrong reaching the AI.");vib(400)}
+catch(e){say(aiErr(e));vib(400)}
 finally{clearTimeout(to);st.busy=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 /* ---------- built-in brain (no API key needed) ---------- */
 async function local(q,img){
@@ -152,7 +165,7 @@ function holo(){hx.drawImage(V,0,0,320,180);const p=hx.getImageData(0,0,320,180)
 for(let i=0,j=0;i<57600;i++,j+=4)G[i]=(p[j]*77+p[j+1]*150+p[j+2]*29)>>8;
 for(let y=1;y<179;y++)for(let x=1;x<319;x++){const i=y*320+x,gx=G[i-319]+2*G[i+1]+G[i+321]-G[i-321]-2*G[i-1]-G[i+319],gy=G[i+319]+2*G[i+320]+G[i+321]-G[i-321]-2*G[i-320]-G[i-319],m=Math.abs(gx)+Math.abs(gy);if(m>60){const j=i*4;q[j]=61;q[j+1]=242;q[j+2]=255;q[j+3]=Math.min(255,(m-60)*2.2)}}
 ex.putImageData(O,0,0)}
-function setHolo(on){if(on&&st.nv)setNV(false,1);st.holo=on;document.body.classList.toggle("holo",on);$("#b-ho").classList.toggle("on",on);if(!on)ex.clearRect(0,0,320,180);say("Holo view "+(on?"online":"off"))}
+function setHolo(on){st.holo=on;document.body.classList.toggle("holo",on);$("#b-ho").classList.toggle("on",on);if(!on)ex.clearRect(0,0,320,180);say("Holo view "+(on?"online":"off"))}
 const wlock=async()=>{try{wl=await navigator.wakeLock.request("screen")}catch{}};
 addEventListener("deviceorientationabsolute",e=>{if(e.alpha==null)return;st.heading=(360-e.alpha+(screen.orientation?.angle||0))%360;$("#hd").textContent="HDG "+String(Math.round(st.heading)).padStart(3,"0")+"°"});
 navigator.getBattery?.().then(b=>{bat=b;const u=()=>{$("#bat").textContent=`BAT ${Math.round(b.level*100)}%${b.charging?" ⚡":""}`;if(b.level<=.2&&!b.charging&&!warned){warned=1;vib(400);say("Suit power low.")}if(b.level>.25)warned=0};b.addEventListener("levelchange",u);b.addEventListener("chargingchange",u);u()});
@@ -175,7 +188,7 @@ const m=prev?mv/n:0;prev=L;let tgt=m>.6?0:Math.min(1,m*6);
 const big=st.boxes.reduce((a,b)=>Math.max(a,b.w*b.h/(V.videoWidth*V.videoHeight)),0);if(big>.25)tgt=Math.max(tgt,Math.min(1,(big-.25)*2.5));
 st.I=st.I*.8+(st.sense?tgt:0)*.2;$("#ss").style.opacity=st.I>.2?Math.min(1,st.I):0;
 if(st.I>.2){const k=Math.ceil(st.I*3),on=90+Math.round(st.I*150),p=[],dur=k*(on+60);for(let i=0;i<k;i++)p.push(on,60);if(Date.now()-lastAlert>dur+120){lastAlert=Date.now();vib(p)}}}
-function draw(ts){ox.clearRect(0,0,OV.width,OV.height);const cx=OV.width/2,cy=OV.height/2;let best,bd=1e9;
+function draw(ts){ox.clearRect(0,0,OV.width,OV.height);tagsDraw();const cx=OV.width/2,cy=OV.height/2;let best,bd=1e9;
 ox.lineWidth=Math.max(2,OV.width/400);ox.font=`${Math.round(OV.width/55)}px monospace`;
 for(const b of st.boxes){const dx=b.x+b.w/2-cx,dy=b.y+b.h/2-cy,dd=Math.hypot(dx,dy);if(dd<bd){bd=dd;best=b}}
 for(const b of st.boxes){const L=b===best&&bd<OV.width*.18;ox.strokeStyle=ox.fillStyle=L?"#ff3d5a":"#3df2ff";ox.strokeRect(b.x,b.y,b.w,b.h);ox.fillText((L?"LOCK ":"")+b.l.toUpperCase(),b.x+4,b.y-6)}
@@ -187,15 +200,46 @@ if(st.heading!=null){const h=-st.heading*Math.PI/180;rx.globalAlpha=1;rx.fillTex
 rx.fillStyle="#ff3d5a";rx.globalAlpha=1;const z=parseFloat($("#stage").style.transform.replace(/\D/g,""))||1;
 for(const b of st.boxes){const ar=b.w*b.h/(V.videoWidth*V.videoHeight),br=((b.x+b.w/2)/V.videoWidth-.5)*66*Math.PI/180/z,r=Math.max(.2,Math.min(.95,1.05-Math.sqrt(ar)*1.6))*(R-8);
 rx.beginPath();rx.arc(R+Math.sin(br)*r,R-Math.cos(br)*r,7,0,7);rx.fill()}}
-/* ---------- night vision / scan pulse ---------- */
-function setNV(on,q){if(on&&st.holo)setHolo(false);st.nv=on;document.body.classList.toggle("nv",on);$("#b-nv").classList.toggle("on",on);if(!q)say("Night vision "+(on?"online":"off"))}
-function scan(){const p=$("#pulse");p.classList.remove("go");void p.offsetWidth;p.classList.add("go");
-if(!det){vib([60,40,60]);return say("Targeting isn't loaded yet, so I can't scan.")}
+/* ---------- scan pulse / deep scan ---------- */
+const ping=()=>{const p=$("#pulse");p.classList.remove("go");void p.offsetWidth;p.classList.add("go")};
+function scan(pre=""){ping();const sy=t=>say(pre+t);
+if(!det){vib([60,40,60]);return sy("Targeting isn't loaded yet, so I can't scan.")}
 const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);const e=Object.entries(c),n=st.boxes.length;
-if(!n){vib(60);return say("Scan complete. No targets in range.")}
+if(!n){vib(60);return sy("Scan complete. No targets in range.")}
 const v=[];for(let i=0;i<Math.min(n,6);i++)v.push(70,90);vib(v);
 const l=e.map(([k,x])=>x>1?x+" "+k+"s":k);
-say("Scan complete. "+n+(n>1?" targets: ":" target: ")+(l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:l[0])+".")}
+sy("Scan complete. "+n+(n>1?" targets: ":" target: ")+(l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:l[0])+".")}
+const DS='You analyze one camera frame for a heads-up display. Return ONLY a JSON array of the up to 6 most notable objects, products, signs or text in view. Each item must be {"label": short name of 1 to 3 words, "note": one useful detail of at most 8 words, "box": [ymin, xmin, ymax, xmax] with each value normalized 0 to 1000}. Never identify people by their face; label them "person". No markdown.';
+async function deep(){
+if(!stream||V.readyState<2)return say("Camera link isn't ready.");
+if(!S.key)return scan("Deep scan needs an AI key, so this is a basic scan. ");
+if(st.busy)return;
+if(!navigator.onLine){say("I'm offline, so deep scan is unavailable.");vib(400);return}
+st.busy=1;ping();$("#st").textContent="DEEP SCAN…";cap("Deep scan in progress…");vib([30,40,30]);
+ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),40000);
+try{let t=await llm({sys:DS,q:"Analyze this frame.",img:frame(),max:2048,json:true,signal:ctl.signal});
+const m=t.replace(/```json|```/g,"").match(/\[[\s\S]*\]/);if(!m)throw new Error("I couldn't read the scan results.");
+const items=JSON.parse(m[0]).filter(i=>i&&typeof i.label==="string").slice(0,6);
+if(!items.length){st.tags=[];vib(60);return say("Deep scan complete. Nothing notable in view.")}
+const now=Date.now();
+st.tags=items.filter(i=>Array.isArray(i.box)&&i.box.length===4&&i.box.every(v=>Number.isFinite(+v))&&i.box[2]>i.box[0]&&i.box[3]>i.box[1]).map(i=>({label:i.label.slice(0,24),note:String(i.note||"").slice(0,44),box:i.box.map(Number),t0:now,exp:now+15000}));
+const v=[];for(let i=0;i<Math.min(items.length,6);i++)v.push(60,80);vib(v);
+cap(items.map(i=>"▸ "+i.label.toUpperCase()+(i.note?" — "+i.note:"")).join("\n"));
+const names=items.map(i=>i.label.toLowerCase());
+st.follow=true;say("Deep scan complete. I see "+(names.length>1?names.slice(0,-1).join(", ")+" and "+names[names.length-1]:names[0])+".",1)}
+catch(e){say(aiErr(e));vib(400)}
+finally{clearTimeout(to);st.busy=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
+function tagsDraw(){const now=Date.now();st.tags=st.tags.filter(t=>t.exp>now);if(!st.tags.length)return;
+const W=OV.width,H=OV.height,fs=Math.round(W/48);ox.save();ox.font=`${fs}px monospace`;ox.lineWidth=Math.max(2,W/380);
+for(const t of st.tags){const age=now-t.t0,a=Math.max(0,Math.min(1,age/300,(t.exp-now)/1500)),g=Math.min(1,age/350);
+const x1=t.box[1]*W/1000,x2=t.box[3]*W/1000,y1=t.box[0]*H/1000,y2=t.box[2]*H/1000,w=(x2-x1)*(.6+.4*g),h=(y2-y1)*(.6+.4*g),x=(x1+x2)/2-w/2,y=(y1+y2)/2-h/2,L=Math.min(w,h)*.22;
+ox.globalAlpha=a;ox.strokeStyle=ox.fillStyle="#ffd23d";ox.shadowColor="#ffd23d";ox.shadowBlur=8;
+ox.beginPath();for(const[px,py,dx,dy]of[[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]]){ox.moveTo(px+dx*L,py);ox.lineTo(px,py);ox.lineTo(px,py+dy*L)}ox.stroke();ox.shadowBlur=0;
+const lab=t.label.toUpperCase(),tw=Math.max(ox.measureText(lab).width,ox.measureText(t.note).width)+12,bh=fs*2.4;
+let ty=y+h+4;if(ty+bh>H)ty=Math.max(0,y-bh-4);const lx=Math.max(0,Math.min(x,W-tw));
+ox.globalAlpha=a*.78;ox.fillStyle="rgba(24,16,0,.9)";ox.fillRect(lx,ty,tw,bh);
+ox.globalAlpha=a;ox.fillStyle="#ffd23d";ox.fillText(lab,lx+6,ty+fs);ox.fillStyle="#fff";ox.fillText(t.note,lx+6,ty+fs*2.0)}
+ox.restore()}
 /* ---------- panels & back button ---------- */
 const stack=[];
 function openL(n){if(stack.includes(n))return;stack.push(n);$("#"+n).classList.add("on");history.pushState({n},"")}
@@ -203,14 +247,14 @@ addEventListener("popstate",()=>{const n=stack.pop();if(n)$("#"+n).classList.rem
 document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>stack.length&&history.back());
 $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
-$("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-nv").onclick=()=>setNV(!st.nv);$("#b-sc").onclick=scan;
+$("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-dp").onclick=()=>{stack.length&&history.back();deep()};$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};
 /* ---------- settings ---------- */
 const sync=()=>{$("#s-voice").value=S.voice;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#s-key").value=S.key;$("#s-model").value=S.model;$("#ptt").hidden=S.voice!=="hold"};
 sync();
 $("#s-voice").onchange=e=>{S.voice=e.target.value;save();sync();pauseRec();want=S.voice==="wake"&&st.run;startRec()};
 $("#s-tts").onchange=e=>{S.tts=e.target.checked;save()};$("#s-hap").onchange=e=>{S.hap=e.target.checked;save()};
 $("#s-bat").onchange=e=>{S.saver=e.target.checked;save();document.body.classList.toggle("noglow",S.saver||adapt>1)};
-$("#s-key").onchange=e=>{S.key=e.target.value.trim();save()};$("#s-model").onchange=e=>{S.model=e.target.value.trim()||"claude-haiku-5-5";save()};
+$("#s-key").onchange=e=>{S.key=e.target.value.trim().replace(/^["']|["']$/g,"");save()};$("#s-model").onchange=e=>{S.model=e.target.value.trim();save()};
 $("#cap").onclick=()=>{const e=$("#cap");if(st.speaking){speechSynthesis.cancel();return}navigator.clipboard?.writeText(e.textContent).then(()=>{vib(15);e.style.borderColor="#fff";setTimeout(()=>e.style.borderColor="",250)}).catch(()=>{})};
 $("#ptt").addEventListener("pointerdown",()=>{want=true;startRec()});
 $("#ptt").addEventListener("pointerup",()=>{want=false;rec&&rec.stop()});
