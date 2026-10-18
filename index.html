@@ -47,14 +47,14 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
-<button id="b-di">TEST AI LINK</button><small id="dg">Build 12. Tap TEST AI LINK to check the connection to Google.</small><small>E.V. thinks with Google Gemini. Questions are billed to the key owner. When you ask about what the camera sees, or use Intel, one camera image is sent to Google.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<button id="b-di">TEST AI LINK</button><small id="dg">Build 13. Tap TEST AI LINK to check the connection to Google.</small><small>E.V. thinks with Google Gemini. Questions are billed to the key owner. When you ask about what the camera sees, or use Intel, one camera image is sent to Google.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.45;font-size:11px">BUILD 12</div></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.45;font-size:11px">BUILD 13</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
-const GKEY="AQ.Ab8RN6K48nYOC6PK2rCT1SzQxfQlYo-6rBIeWi0Zg_t24_OEVw";
+const GKEY="AQ.Ab8RN6KCmNFn2xnPBE7CLEp_JyG2toojETSFhE_Kuu76YKXuWA";
 const S={voice:"wake",saver:false,hap:true,tts:true,key:"",model:""};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 S.key=GKEY;S.model="";
@@ -67,7 +67,12 @@ const cap=t=>{$("#cap").textContent=t};
 /* ---------- speech out ---------- */
 let voice;const pick=()=>{const v=speechSynthesis.getVoices().filter(x=>/^en[-_](US|GB)/i.test(x.lang));voice=v.find(x=>/google/i.test(x.name)&&/female|uk english/i.test(x.name))||v.find(x=>/google/i.test(x.name))||v.find(x=>/female|samantha|zira/i.test(x.name))||v[0]};
 if(window.speechSynthesis){pick();speechSynthesis.addEventListener("voiceschanged",pick)}
-function say(t,k){if(!k)cap("E.V.: "+t);if(!S.tts||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);if(voice){u.voice=voice;u.lang=voice.lang}u.pitch=1.05;st.speaking=true;pauseRec();const d=()=>{st.speaking=false;if(st.follow){st.follow=false;st.awake=Date.now()+8000}resumeRec()};u.onend=d;u.onerror=d;speechSynthesis.speak(u)}
+/* long answers are spoken in sentence-sized chunks: Android Chrome silently cuts off long single utterances */
+let sid=0;
+const chunks=t=>{const o=[];let c="";for(const x of t.replace(/\s+/g," ").trim().split(/(?<=[.!?])\s+/)){if(c&&(c+" "+x).length>200){o.push(c);c=""}c=c?c+" "+x:x;while(c.length>260){let i=c.lastIndexOf(" ",240);if(i<1)i=240;o.push(c.slice(0,i).trim());c=c.slice(i).trim()}}if(c)o.push(c);return o};
+function say(t,k){if(!k)cap("E.V.: "+t);if(!S.tts||!window.speechSynthesis)return;speechSynthesis.cancel();const ch=chunks(t),my=++sid;if(!ch.length)return;st.speaking=true;pauseRec();
+const d=()=>{if(my!==sid||!st.speaking)return;st.speaking=false;if(st.follow){st.follow=false;st.awake=Date.now()+8000}resumeRec()};
+ch.forEach((s,i)=>{const u=new SpeechSynthesisUtterance(s);if(voice){u.voice=voice;u.lang=voice.lang}u.pitch=1.05;if(i===ch.length-1)u.onend=d;u.onerror=d;speechSynthesis.speak(u)})}
 /* ---------- speech in ---------- */
 const SR=window.webkitSpeechRecognition;let rec,want=false,recStart=0,delay=300,timer;
 function startRec(){if(!SR||!want||st.speaking||document.hidden||rec)return;rec=new SR();rec.lang="en-US";rec.continuous=S.voice==="wake";rec.interimResults=false;
@@ -93,7 +98,7 @@ if(/^(scan|ping|sweep)( area| around| surroundings)?$/.test(k))return scan();
 if(/^(battery|power|status)( level| status)?$/.test(k))return say(bat?`Power at ${Math.round(bat.level*100)} percent${bat.charging?", charging":""}.`:"Power telemetry unavailable.");
 ask(c,VIS.test(c))}
 function frame(){const w=Math.min(1024,V.videoWidth),c=document.createElement("canvas");c.width=w;c.height=Math.round(w*V.videoHeight/V.videoWidth);const x=c.getContext("2d");x.drawImage(V,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.7).split(",")[1]}
-const SYS="You are E.V., a voice assistant inside a heads-up display on the user's phone. Your reply is spoken aloud, so use plain conversational sentences: no markdown, lists, emoji or symbols. Keep answers to one to three sentences unless the user asks for more detail. When a camera image is attached, answer from what is visible and say so if you cannot tell. Do not identify people from their faces. If you are unsure, say so briefly.";
+const SYS="You are E.V., a voice assistant inside a heads-up display on the user's phone. Your reply is spoken aloud, so use plain conversational sentences: no markdown, lists, emoji or symbols. Always answer the question completely and directly yourself, from your own knowledge. Never tell the user to search the web, open a browser, check a website or open another app, and never offer to do so. Match the length to the question: a sentence or two for simple questions, and a full, thorough explanation, as long as it needs to be, for anything complex. If the question needs live data you do not have, such as today's news or weather, say that briefly and then give the best useful answer you can anyway. When a camera image is attached, answer from what is visible and say so if you cannot tell. Do not identify people from their faces. If you are unsure, say so briefly.";
 let ctl,gok;
 const isClaude=()=>/^sk-ant/.test(S.key);
 async function llm({sys,q,img,hist=[],max=1024,json=false,signal}){
@@ -138,15 +143,15 @@ if(!S.key)return local(q,img);
 if(!navigator.onLine){say("I'm offline, so I can't reach my brain.");vib(400);return}
 if(img&&(!stream||V.readyState<2))img=false;
 st.busy=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
-ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),30000);
-try{const a=(await llm({sys:SYS,q,img:img?frame():null,hist:st.hist,max:2048,signal:ctl.signal})).replace(/[*#_`]/g,"").trim()||"I have no answer for that.";
+ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),60000);
+try{const a=(await llm({sys:SYS,q,img:img?frame():null,hist:st.hist,max:8192,signal:ctl.signal})).replace(/[*#_`]/g,"").trim()||"I have no answer for that.";
 st.hist.push({role:"user",content:img?"[camera image] "+q:q},{role:"assistant",content:a});st.hist=st.hist.slice(-8);
 st.follow=true;say(a)}
 catch(e){say(aiErr(e));vib(400)}
 finally{clearTimeout(to);st.busy=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
-try{const t=await llm({sys:"Reply with the single word OK.",q:"ping",max:64,signal:AbortSignal.timeout(25000)});o.textContent="Build 12. AI link OK using "+(gok?gok.m:"?")+(t.trim()?" (reply: "+t.trim().slice(0,30)+")":"")+".";vib(40)}
-catch(e){o.textContent="Build 12. FAILED: "+e.message;vib(300);try{navigator.clipboard.writeText(e.message)}catch{}}}
+try{const t=await llm({sys:"Reply with the single word OK.",q:"ping",max:64,signal:AbortSignal.timeout(25000)});o.textContent="Build 13. AI link OK using "+(gok?gok.m:"?")+(t.trim()?" (reply: "+t.trim().slice(0,30)+")":"")+".";vib(40)}
+catch(e){o.textContent="Build 13. FAILED: "+e.message;vib(300);try{navigator.clipboard.writeText(e.message)}catch{}}}
 $("#b-di").onclick=diag;
 /* ---------- built-in brain (no API key needed) ---------- */
 async function local(q,img){
@@ -170,17 +175,7 @@ if(!st.boxes.length)return "I don't recognize anything specific in view right no
 const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);
 const l=Object.entries(c).map(([k,v])=>v>1?v+" "+k+"s":"a "+k);
 return "I can see "+(l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:l[0])+"."}
-const t=s.replace(/^(what('?s| is| are| was| were| does)|who('?s| is| was| were)|where('?s| is)|when (was|is|did)|tell me about|explain|define|how does|how do)\s+/,"").replace(/^(a|an|the)\s+/,"").replace(/\s+mean$/,"").trim();
-if(t===s||t.length<2)return "I can handle facts, math, the time and what my sensors see. Open-ended conversation is beyond me right now.";
-if(!navigator.onLine)return "I'm offline, so I can only help with the time, math and what I can see.";
-const ac=new AbortController(),to=setTimeout(()=>ac.abort(),8000);
-try{const j=await(await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&generator=search&gsrlimit=1&prop=extracts&exintro=1&explaintext=1&exsentences=2&gsrsearch="+encodeURIComponent(t),{signal:ac.signal})).json();
-const p=j.query&&Object.values(j.query.pages)[0];
-const x=((p&&p.extract)||"").replace(/\s*\([^)]*\)/g,"").replace(/\s+/g," ").trim();
-if(!x||/may (also )?refer to/.test(x))return "I couldn't find a clear answer about "+t+".";
-return x}
-catch{return "I couldn't reach my knowledge base."}
-finally{clearTimeout(to)}}
+return "I can only help with the time, math and what my sensors see without my AI link."}
 /* ---------- camera & device ---------- */
 async function cam(){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});
 V.srcObject=stream;await V.play();track=stream.getVideoTracks()[0];caps=track.getCapabilities?track.getCapabilities():{};
