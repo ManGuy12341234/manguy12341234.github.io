@@ -60,3 +60,6 @@ The wake word accepts anything that sounds like "E.V." (ev, eve, evie, eevee, ee
 
 ## G. Better brain
 Settings -> Brain engine -> **Cloud (my API key)**: paste a free key from aistudio.google.com (Gemini) or console.groq.com (Groq). Gemini can also see the camera frame for "what am I looking at". Your questions are sent to that service. The **CPU model** box accepts any Hugging Face GGUF as `owner/repo:file.gguf`; the default CPU brain is now Qwen2.5 1.5B (about 1.1 GB).
+
+## H. Wake words
+Besides E.V., E.V. also wakes on sound-alikes at the start of a phrase (easy, tv, ez, ebay, ivy...). Anything else she mishears: Settings -> Extra wake words (comma separated). The text box shows what Chrome heard.

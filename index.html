@@ -56,15 +56,15 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <label>Brain engine<select id="s-eng"><option value="auto">Auto: GPU, else CPU</option><option value="cpu">CPU only</option><option value="cloud">Cloud (my API key)</option></select></label>
 <label>Cloud service<select id="s-cp"><option value="gemini">Google Gemini (free key)</option><option value="groq">Groq (free key)</option><option value="openrouter">OpenRouter</option><option value="custom">Custom</option></select></label>
 <label>API key<input id="s-ck" type="password" autocomplete="off" placeholder="paste key"></label><label>Model<input id="s-cm"></label><label>Endpoint<input id="s-cu"></label>
-<label>CPU model<input id="s-gg" placeholder="owner/repo:file.gguf"></label>
-<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 19. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<label>CPU model<input id="s-gg" placeholder="owner/repo:file.gguf"></label><label>Extra wake words<input id="s-ww" placeholder="easy, tv, ..."></label>
+<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 20. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 19</div></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 20</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
-const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto",ckey:"",cprov:"gemini",curl:"https://generativelanguage.googleapis.com/v1beta/openai",cmodel:"gemini-flash-latest",gguf:""};
+const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto",ckey:"",cprov:"gemini",curl:"https://generativelanguage.googleapis.com/v1beta/openai",cmodel:"gemini-flash-latest",gguf:"",ww:""};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 delete S.key;delete S.model;
 const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
@@ -104,8 +104,9 @@ try{rec.start()}catch{rec=null}}
 function pauseRec(){clearTimeout(timer);if(rec){const r=rec;rec=null;r.onend=null;try{r.abort()}catch{}}}
 function resumeRec(){clearTimeout(timer);if(S.voice==="wake")timer=setTimeout(startRec,300)}
 /* wake word: anything that sounds like "E.V." (ev, eve, evie, eevee, ee vee, ivy, e.v. ...). Odd sounds like "a.v." only count at the start of a short phrase. */
-const WK=/\b(e\.?\s?v\.?|ee\s?vee|ee?v(ee|ie|ey|y|i|e)?|ivy|iv|ebi|evi|avi|ave)\b/,WLK=/^(eaves|eeves|a\.?\s?v\.?|he\s?v|ee\s?v)\b/;
-const wk=t=>{let m=t.match(WK);if(!m&&t.split(/\s+/).length<=5)m=t.match(WLK);return m?t.slice(m.index+m[0].length).replace(/^[\s,.:;-]+/,""):null};
+const WK=/\b(e\.?\s?v\.?|ee\s?vee|ee?v(ee|ie|ey|y|i|e)?|ivy|iv|ebi|evi|avi|ave)\b/,WLK=/^(easy|ease|eazy|eezy|ez|e\s?z|tv|t\.?\s?v\.?|tee\s?vee|teevee|ebay|eaves|eeves|a\.?\s?v\.?|i\.?\s?v\.?|b\.?\s?v\.?|d\.?\s?v\.?|he\s?v|ee\s?v|ee\s?be|ebb?y|eevy|yv)\b/;
+const xw=()=>{const l=(S.ww||"").toLowerCase().split(/[,;]+/).map(x=>x.trim().replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).filter(Boolean);return l.length?new RegExp("^("+l.join("|")+")\\b"):null};let XW=xw();
+const wk=t=>{t=t.trim();let m=t.match(WK);if(!m&&t.split(/\s+/).length<=8)m=t.match(WLK)||(XW&&t.match(XW));return m?t.slice(m.index+m[0].length).replace(/^[\s,.:;-]+/,""):null};
 const pickAlt=r=>{for(let k=0;k<r.length;k++)if(wk(r[k].transcript.toLowerCase())!==null)return r[k].transcript;return r[0].transcript};
 function hear(t){t=t.toLowerCase().trim();cap("“"+t+"”");let c;const w=S.voice==="hold"?null:wk(t);
 if(S.voice==="hold")c=t;else if(w!==null){c=w;st.awake=Date.now()+10000;if(!c)return say("Yes, Peter?")}else if(Date.now()<st.awake)c=t;else return;cmd(c)}
@@ -256,10 +257,10 @@ catch(e){if(my===sid)say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
 const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
-if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 19. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
-if(!BR.ready){o.textContent="Build 19. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
-try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 19. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
-catch(e){o.textContent="Build 19. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 20. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
+if(!BR.ready){o.textContent="Build 20. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 20. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 20. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
 $("#b-di").onclick=diag;
 $("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
@@ -375,9 +376,10 @@ $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
 $("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};$("#b-ht").onclick=()=>{stack.length&&history.back();hudTest()};
 /* ---------- settings ---------- */
-const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-cp").value=S.cprov;$("#s-ck").value=S.ckey;$("#s-cm").value=S.cmodel;$("#s-cu").value=S.curl;$("#s-gg").value=S.gguf;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
+const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-cp").value=S.cprov;$("#s-ck").value=S.ckey;$("#s-cm").value=S.cmodel;$("#s-cu").value=S.curl;$("#s-gg").value=S.gguf;$("#s-ww").value=S.ww;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
 sync();
 $("#s-voice").onchange=e=>{S.voice=e.target.value;save();sync();pauseRec();want=S.voice==="wake"&&st.run;startRec()};
+$("#s-ww").onchange=e=>{S.ww=e.target.value;save();XW=xw()};
 $("#s-eng").onchange=e=>{S.engine=e.target.value;save();BR.noGpu=false;BR.paused=false;BR.tries=0;cap("Switching brain engine.");swapBrain()};
 const CP={gemini:["https://generativelanguage.googleapis.com/v1beta/openai","gemini-flash-latest"],groq:["https://api.groq.com/openai/v1","llama-3.3-70b-versatile"],openrouter:["https://openrouter.ai/api/v1","meta-llama/llama-3.3-70b-instruct:free"]};
 const rebrain=()=>{BR.noGpu=false;BR.paused=false;BR.tries=0;swapBrain()};
