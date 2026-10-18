@@ -47,32 +47,42 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
-<button id="b-di">TEST AI LINK</button><small id="dg">Build 13. Tap TEST AI LINK to check the connection to Google.</small><small>E.V. thinks with Google Gemini. Questions are billed to the key owner. When you ask about what the camera sees, or use Intel, one camera image is sent to Google.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 14. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.45;font-size:11px">BUILD 13</div></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 14</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
-const GKEY="AQ.Ab8RN6KCmNFn2xnPBE7CLEp_JyG2toojETSFhE_Kuu76YKXuWA";
-const S={voice:"wake",saver:false,hap:true,tts:true,key:"",model:""};
+const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced"};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
-S.key=GKEY;S.model="";
-const save=()=>{try{localStorage.setItem("ev",JSON.stringify({...S,key:"",model:""}))}catch{}};
-const st={tac:true,tgt:null,anl:null,run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
+delete S.key;delete S.model;
+const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
+const st={tac:true,tgt:null,anl:null,run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,gen:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
 let stream,track,caps={},det,wl,deferred,bat,warned=0,infMs=100,adapt=0,low=0,frames=0,t0=performance.now(),lastInf=0,lastAlert=0,prev,skip=0;
 const MODEL="https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",MP="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/";
 const vib=p=>{if(S.hap&&navigator.vibrate)try{navigator.vibrate(p)}catch{}};
 const cap=t=>{$("#cap").textContent=t};
 /* ---------- speech out ---------- */
-let voice;const pick=()=>{const v=speechSynthesis.getVoices().filter(x=>/^en[-_](US|GB)/i.test(x.lang));voice=v.find(x=>/google/i.test(x.name)&&/female|uk english/i.test(x.name))||v.find(x=>/google/i.test(x.name))||v.find(x=>/female|samantha|zira/i.test(x.name))||v[0]};
-if(window.speechSynthesis){pick();speechSynthesis.addEventListener("voiceschanged",pick)}
-/* long answers are spoken in sentence-sized chunks: Android Chrome silently cuts off long single utterances */
-let sid=0;
+const syn=window.speechSynthesis;let voice;const pick=()=>{const v=syn.getVoices().filter(x=>/^en[-_](US|GB)/i.test(x.lang));voice=v.find(x=>/google/i.test(x.name)&&/female|uk english/i.test(x.name))||v.find(x=>/google/i.test(x.name))||v.find(x=>/female|samantha|zira/i.test(x.name))||v[0]};
+if(syn){pick();syn.addEventListener("voiceschanged",pick)}
+/* Speech is a queue of short utterances (Android Chrome drops long ones).
+   sid = which spoken answer is current, pend = utterances still queued, genDone = no more text is coming for it.
+   Every callback checks sid, so a cancelled answer can never leave E.V. stuck "speaking". */
+let sid=0,pend=0,genDone=true,lastSpeak=0,dueBy=0;
 const chunks=t=>{const o=[];let c="";for(const x of t.replace(/\s+/g," ").trim().split(/(?<=[.!?])\s+/)){if(c&&(c+" "+x).length>200){o.push(c);c=""}c=c?c+" "+x:x;while(c.length>260){let i=c.lastIndexOf(" ",240);if(i<1)i=240;o.push(c.slice(0,i).trim());c=c.slice(i).trim()}}if(c)o.push(c);return o};
-function say(t,k){if(!k)cap("E.V.: "+t);if(!S.tts||!window.speechSynthesis)return;speechSynthesis.cancel();const ch=chunks(t),my=++sid;if(!ch.length)return;st.speaking=true;pauseRec();
-const d=()=>{if(my!==sid||!st.speaking)return;st.speaking=false;if(st.follow){st.follow=false;st.awake=Date.now()+8000}resumeRec()};
-ch.forEach((s,i)=>{const u=new SpeechSynthesisUtterance(s);if(voice){u.voice=voice;u.lang=voice.lang}u.pitch=1.05;if(i===ch.length-1)u.onend=d;u.onerror=d;speechSynthesis.speak(u)})}
+const fol=()=>{if(st.follow){st.follow=false;st.awake=Date.now()+8000}};
+function fin(my){if(my!==sid||!st.speaking)return;st.speaking=false;fol();resumeRec()}
+function enq(s,my){if(my!==sid)return;lastSpeak=Date.now();if(!S.tts||!syn)return;const u=new SpeechSynthesisUtterance(s);if(voice){u.voice=voice;u.lang=voice.lang}u.pitch=1.05;pend++;dueBy=Math.max(dueBy,Date.now())+s.length*90+1500;const x=()=>{if(my!==sid)return;pend--;if(pend<=0&&genDone)fin(my)};u.onend=x;u.onerror=x;syn.speak(u)}
+function hush(){if(syn&&(syn.speaking||syn.pending)){syn.cancel();return true}return false}
+function beginSpeech(){const my=++sid;pend=0;genDone=false;lastSpeak=Date.now();dueBy=Date.now();if(S.tts&&syn){st.speaking=true;pauseRec()}return my}
+function say(t,k){if(!k)cap("E.V.: "+t);const ch=chunks(t);if(!ch.length)return;if(!S.tts||!syn){fol();return}const waited=hush(),my=beginSpeech();genDone=true;const go=()=>{if(my===sid)ch.forEach(s=>enq(s,my))};waited?setTimeout(go,90):go()}
+function stopTalk(){sid++;pend=0;genDone=true;const g=st.gen;if(syn)syn.cancel();if(g&&BR.eng)BR.eng.interruptGenerate().catch(()=>{});if(st.speaking){st.speaking=false;resumeRec()}}
+/* watchdog: recovers if the speech engine goes quiet without telling us, or if the mic is not listening when it should be */
+setInterval(()=>{if(!st.run)return;const n=Date.now();
+if(st.speaking&&genDone&&n-lastSpeak>3000&&syn&&!syn.speaking&&!syn.pending){pend=0;fin(sid)}
+else if(st.speaking&&genDone&&n>dueBy+10000){try{syn.cancel()}catch{}pend=0;fin(sid)}
+if(S.voice==="wake")startRec()},2000);
 /* ---------- speech in ---------- */
 const SR=window.webkitSpeechRecognition;let rec,want=false,recStart=0,delay=300,timer;
 function startRec(){if(!SR||!want||st.speaking||document.hidden||rec)return;rec=new SR();rec.lang="en-US";rec.continuous=S.voice==="wake";rec.interimResults=false;
@@ -97,70 +107,53 @@ if(/^(tactical|tac)( data| mode| view| hud)?( on| off)?$|^(on|off) tactical( dat
 if(/^(scan|ping|sweep)( area| around| surroundings)?$/.test(k))return scan();
 if(/^(battery|power|status)( level| status)?$/.test(k))return say(bat?`Power at ${Math.round(bat.level*100)} percent${bat.charging?", charging":""}.`:"Power telemetry unavailable.");
 ask(c,VIS.test(c))}
-function frame(){const w=Math.min(1024,V.videoWidth),c=document.createElement("canvas");c.width=w;c.height=Math.round(w*V.videoHeight/V.videoWidth);const x=c.getContext("2d");x.drawImage(V,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.7).split(",")[1]}
-const SYS="You are E.V., a voice assistant inside a heads-up display on the user's phone. Your reply is spoken aloud, so use plain conversational sentences: no markdown, lists, emoji or symbols. Always answer the question completely and directly yourself, from your own knowledge. Never tell the user to search the web, open a browser, check a website or open another app, and never offer to do so. Match the length to the question: a sentence or two for simple questions, and a full, thorough explanation, as long as it needs to be, for anything complex. If the question needs live data you do not have, such as today's news or weather, say that briefly and then give the best useful answer you can anyway. When a camera image is attached, answer from what is visible and say so if you cannot tell. Do not identify people from their faces. If you are unsure, say so briefly.";
-let ctl,gok;
-const isClaude=()=>/^sk-ant/.test(S.key);
-async function llm({sys,q,img,hist=[],max=1024,json=false,signal}){
-let r,j;
-if(isClaude()){
-const content=img?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:img}},{type:"text",text:q}]:q;
-r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal,headers:{"content-type":"application/json","x-api-key":S.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:/^claude/.test(S.model)?S.model:"claude-haiku-5-5",max_tokens:max,system:sys,messages:[...hist,{role:"user",content}]})});
-j=await r.json();
-if(!r.ok)throw new Error(r.status===401?"That key was rejected. Check it in settings.":r.status===429?"I'm being rate limited. Try again in a moment.":(j.error&&j.error.message)||"Request failed.");
-return(j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ")}
-const parts=[];if(img)parts.push({inlineData:{mimeType:"image/jpeg",data:img}});parts.push({text:q});
-const gc={maxOutputTokens:max};if(json)gc.responseMimeType="application/json";
-const body=JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[...hist.map(h=>({role:h.role==="assistant"?"model":"user",parts:[{text:h.content}]})),{role:"user",parts}],generationConfig:gc});
-const GB="https://generativelanguage.googleapis.com/v1beta/models";
-const gcall=async(m,a)=>{const x=await fetch(GB+"/"+m+":generateContent"+(a==="q"?"?key="+encodeURIComponent(S.key):""),{method:"POST",signal,headers:a==="h"?{"content-type":"application/json","x-goog-api-key":S.key}:{"content-type":"application/json"},body});let y={};try{y=await x.json()}catch{}return{ok:x.ok,st:x.status,y,msg:((y.error&&y.error.message)||"")+""}};
-const MODELS=/^gemini/.test(S.model)?[S.model]:["gemini-3.8-flash","gemini-3.6-flash","gemini-3.5-flash-lite","gemini-flash-latest"],plan=[];
-if(gok)plan.push(gok);
-MODELS.forEach((m,i)=>{for(const a of(i?["h"]:["h","q"]))if(!(gok&&gok.m===m&&gok.a===a))plan.push({m,a})});
-const errs=[];let bad=0;
-for(const t of plan){
-let r2;try{r2=await gcall(t.m,t.a)}catch(err){if(err.name==="AbortError")throw err;errs.push("network");continue}
-if(r2.ok){gok=t;j=r2.y;break}
-if(r2.st===429)throw new Error("I'm being rate limited. Try again in a moment.");
-if(r2.st===401||r2.st===403)bad=1;
-errs.push(r2.st+" "+t.m+": "+r2.msg.slice(0,50))}
-if(!j&&!errs.every(z=>z==="network")){
-/* ask Google which models this key can actually use, then try the newest flash ones */
-try{const lr=await fetch(GB+"?pageSize=200",{signal,headers:{"x-goog-api-key":S.key}}),lj=await lr.json().catch(()=>({}));
-if(lr.ok){const tried=new Set(plan.map(t=>t.m)),names=(lj.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")&&/flash/.test(m.name)&&!/image|tts|live|audio|robotics|computer|embedding|exp|lite/.test(m.name)).map(m=>m.name.replace("models/","")).filter(n=>!tried.has(n)).sort().reverse();
-for(const m of names.slice(0,3)){const r2=await gcall(m,"h");if(r2.ok){gok={m,a:"h"};j=r2.y;break}errs.push(r2.st+" "+m+": "+r2.msg.slice(0,50))}
-if(!j&&!names.length)errs.unshift("key works but no usable flash model listed")}
-else{if(lr.status===401||lr.status===403)bad=1;errs.unshift("list "+lr.status+": "+((lj.error&&lj.error.message)||"").slice(0,70))}}
-catch(err){if(err.name==="AbortError")throw err}}
-if(!j){if(errs.every(z=>z==="network"))throw new Error("Failed to fetch");throw new Error(((bad?"Google rejected the key. ":"Google error. ")+errs[0]).slice(0,155))}
-if(j.promptFeedback&&j.promptFeedback.blockReason)throw new Error("I can't answer that one.");
-const c=j.candidates&&j.candidates[0];
-return((c&&c.content&&c.content.parts)||[]).filter(x=>x.text).map(x=>x.text).join(" ")}
-const aiErr=e=>e.name==="AbortError"?"That took too long.":e.message==="Failed to fetch"?"I couldn't reach the AI.":e.message.length<160?e.message:"Something went wrong reaching the AI.";
-async function ask(q,img){
-if(st.busy)return;
-if(!S.key)return local(q,img);
-if(!navigator.onLine){say("I'm offline, so I can't reach my brain.");vib(400);return}
-if(img&&(!stream||V.readyState<2))img=false;
-st.busy=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
-ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),60000);
-try{const a=(await llm({sys:SYS,q,img:img?frame():null,hist:st.hist,max:8192,signal:ctl.signal})).replace(/[*#_`]/g,"").trim()||"I have no answer for that.";
-st.hist.push({role:"user",content:img?"[camera image] "+q:q},{role:"assistant",content:a});st.hist=st.hist.slice(-8);
-st.follow=true;say(a)}
-catch(e){say(aiErr(e));vib(400)}
-finally{clearTimeout(to);st.busy=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
-async function diag(){const o=$("#dg");o.textContent="Testing…";
-try{const t=await llm({sys:"Reply with the single word OK.",q:"ping",max:64,signal:AbortSignal.timeout(25000)});o.textContent="Build 13. AI link OK using "+(gok?gok.m:"?")+(t.trim()?" (reply: "+t.trim().slice(0,30)+")":"")+".";vib(40)}
-catch(e){o.textContent="Build 13. FAILED: "+e.message;vib(300);try{navigator.clipboard.writeText(e.message)}catch{}}}
-$("#b-di").onclick=diag;
-/* ---------- built-in brain (no API key needed) ---------- */
-async function local(q,img){
-st.busy=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
-try{const a=await offline(q,img);st.follow=true;say(a)}
-catch{say("I couldn't work that out.");vib(400)}
-finally{st.busy=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
-async function offline(q,img){
-const s=q.toLowerCase().replace(/[?!]/g,"").replace(/\s+/g," ").trim(),n=new Date();
+/* ---------- brain: a free open model that runs on this phone (WebLLM + WebGPU). No key, no account, no cloud AI. ---------- */
+const WL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.85/+esm";
+const BS={fast:{re:/^SmolLM2-360M-Instruct-q4f(16|32)_1-MLC$/,mb:"250 MB"},balanced:{re:/^Llama-3\.2-1B-Instruct-q4f(16|32)_1-MLC$/,mb:"700 MB"},best:{re:/^Llama-3\.2-3B-Instruct-q4f(16|32)_1-MLC$/,mb:"1.7 GB"}};
+if(!BS[S.size])S.size="balanced";
+const BR={W:null,eng:null,id:"",ready:false,loading:null,err:"",pct:0,paused:false,tries:0};
+const SYS=()=>{const n=new Date();return "You are E.V., a voice assistant inside a heads-up display on the user's phone. Today is "+n.toLocaleDateString([],{weekday:"long",year:"numeric",month:"long",day:"numeric"})+" and the time is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+". Your reply is spoken aloud, so use plain spoken sentences: no markdown, lists, emoji or symbols. Answer the question directly and completely from your own knowledge. Never tell the user to search the web, open a browser, check a website or open an app. Give simple answers in one or two sentences, and explain bigger questions clearly in a short paragraph. If you are not sure of a fact, say so briefly instead of guessing. Do not identify people from their faces."};
+const clean=s=>s.replace(/[*#_`]/g,"").trim();
+const labels=()=>{const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);const l=Object.entries(c).map(([k,v])=>v>1?v+" "+k+"s":"a "+k);return l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:(l[0]||"")};
+const lib=async()=>BR.W||(BR.W=await import(WL));
+async function f16(){try{const a=await navigator.gpu.requestAdapter();return!!(a&&a.features.has("shader-f16"))}catch{return false}}
+/* model ids are looked up in the library's own list, so a renamed id cannot break loading */
+async function pickIds(){const W=await lib(),list=W.prebuiltAppConfig.model_list.map(m=>m.model_id),h=await f16(),pref=h?/q4f16/:/q4f32/;
+let ids=list.filter(i=>BS[S.size].re.test(i));
+if(!ids.length)ids=list.filter(i=>/(Llama-3\.2-1B|SmolLM2-360M)-Instruct-q4f(16|32)_1-MLC$/.test(i));
+return ids.sort((a,b)=>(pref.test(a)?0:1)-(pref.test(b)?0:1))}
+const prog=p=>{BR.pct=Math.round((p.progress||0)*100);$("#st").textContent="BRAIN "+BR.pct+"%";if(!st.speaking&&!st.busy)cap("Loading my brain, "+BR.pct+"%. "+String(p.text||"").slice(0,70))};
+async function loadBrain(){
+if(BR.ready)return true;if(BR.loading)return BR.loading;
+return BR.loading=(async()=>{
+BR.err="";BR.tries++;
+if(!navigator.gpu){BR.err="This browser has no WebGPU.";return false}
+try{const ids=await pickIds();if(!ids.length){BR.err="No model of that size in this library version.";return false}
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+for(const id of ids){try{BR.eng=await BR.W.CreateMLCEngine(id,{initProgressCallback:prog});BR.id=id;BR.ready=true;break}catch(e){BR.err=String(e&&e.message||e).slice(0,140);BR.eng=null}}
+if(BR.ready){BR.err="";$("#st").textContent=det?"TARGETING ONLINE":"ONLINE";cap("Brain online.");vib([30,40,30]);return true}
+return false}
+catch(e){BR.err=String(e&&e.message||e).slice(0,140);return false}
+})().finally(()=>{BR.loading=null})}
+async function swapBrain(){if(BR.loading)await BR.loading.catch(()=>{});const e=BR.eng;BR.ready=false;BR.eng=null;BR.id="";try{e&&await e.unload()}catch{}return loadBrain()}
+/* start loading after ENGAGE, but never download a big model on mobile data without asking */
+async function autoBrain(){
+if(!navigator.gpu){cap("This phone's browser has no WebGPU, so E.V. runs in basic mode.");return}
+try{const W=await lib(),ids=await pickIds(),c=navigator.connection,metered=!!c&&(c.saveData||c.type==="cellular");let cached=false;try{cached=!!ids.length&&await W.hasModelInCache(ids[0])}catch{}
+if(!cached&&metered){BR.paused=true;say("My brain needs a one time download of about "+BS[S.size].mb+". You're on mobile data, so I paused it. Open Tools, Settings, then Load Brain when you're on Wi-Fi.");return}}
+catch(e){BR.err="Could not load the brain library. Open the app once online.";cap(BR.err);return}
+loadBrain()}
+async function think({sys,q,hist=[],max=450,temp=.7,timeout=120000,onText}){
+const eng=BR.eng;if(!eng)throw new Error("brain not loaded");
+let full="",stop=false;
+const tmo=setTimeout(()=>{stop=true;eng.interruptGenerate().catch(()=>{})},timeout);
+try{const it=await eng.chat.completions.create({messages:[{role:"system",content:sys},...hist,{role:"user",content:q}],max_tokens:max,temperature:temp,stream:true});
+for await(const c of it){const d=(c.choices&&c.choices[0]&&c.choices[0].delta&&c.choices[0].delta.content)||"";if(!d||stop)continue;full+=d;if(onText&&onText(d,full)===false){stop=true;eng.interruptGenerate().catch(()=>{})}}}
+finally{clearTimeout(tmo)}
+return full}
+const brainErr=e=>{const m=String(e&&e.message||e);if(/lost|memory|OOM|allocat|device/i.test(m)){BR.ready=false;BR.eng=null;BR.err="GPU memory or device lost";return "My on-device brain ran out of memory. Try the Fast brain in Settings."}return "My brain hit an error. Try asking again."};
+/* instant answers that never need the model (a small model is bad at math and clocks) */
+function quick(q){const s=q.toLowerCase().replace(/[?!]/g,"").replace(/\s+/g," ").trim(),n=new Date();
 if(/^(hi|hello|hey)$/.test(s))return "Online and listening.";
 if(/^(who|what) are you$|^what'?s your name$/.test(s))return "I'm E.V., the voice assistant in your suit interface.";
 if(/^how are you/.test(s))return "All systems nominal.";
@@ -169,13 +162,49 @@ if(/date|day|today/.test(s))return "Today is "+n.toLocaleDateString([],{weekday:
 return "It is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+"."}
 const e=s.replace(/^(what('?s| is)|calculate|compute|how much is|solve)\s+/,"").replace(/\b(multiplied by|times|x)\b/g,"*").replace(/\b(divided by|over)\b/g,"/").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-").replace(/\s+/g," ").trim();
 if(/^[\d\s.+\-*\/()%]+$/.test(e)&&/\d\s*[-+*\/%]\s*\d/.test(e)){try{const r=Function('"use strict";return ('+e+')')();if(Number.isFinite(r))return "The answer is "+(+r.toFixed(6))+"."}catch{}}
-if(img){
-if(!det)return "My targeting system isn't loaded yet, so I can't tell what's in view.";
-if(!st.boxes.length)return "I don't recognize anything specific in view right now.";
-const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);
-const l=Object.entries(c).map(([k,v])=>v>1?v+" "+k+"s":"a "+k);
-return "I can see "+(l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:l[0])+"."}
-return "I can only help with the time, math and what my sensors see without my AI link."}
+return null}
+/* basic mode, used only when the on-device brain can't run: detector labels and Wikipedia summaries */
+async function lite(q,vis){
+const s=q.toLowerCase().replace(/[?!]/g,"").replace(/\s+/g," ").trim();
+if(vis){if(!det)return "My targeting system isn't loaded yet, so I can't tell what's in view.";const l=labels();return l?"I can see "+l+".":"I don't recognize anything specific in view right now."}
+const t=s.replace(/^(what('?s| is| are| was| were| does)|who('?s| is| was| were)|where('?s| is)|when (was|is|did)|tell me about|explain|define|how does|how do)\s+/,"").replace(/^(a|an|the)\s+/,"").replace(/\s+mean$/,"").trim();
+if(t===s||t.length<2)return "Without my on-device brain I can only do the time, math, what my sensors see and quick facts. "+(!navigator.gpu?"This phone's browser can't run the brain because it has no WebGPU.":BR.paused?"The brain download is paused. Open Tools, Settings, then Load Brain.":BR.err?"The brain isn't loaded: "+BR.err:"The brain is loading.");
+if(!navigator.onLine)return "I'm offline, so I can only help with the time, math and what I can see.";
+const ac=new AbortController(),to=setTimeout(()=>ac.abort(),8000);
+try{const j=await(await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&generator=search&gsrlimit=1&prop=extracts&exintro=1&explaintext=1&exsentences=3&gsrsearch="+encodeURIComponent(t),{signal:ac.signal})).json();
+const p=j.query&&Object.values(j.query.pages)[0];
+const x=((p&&p.extract)||"").replace(/\s*\([^)]*\)/g,"").replace(/\s+/g," ").trim();
+if(!x||/may (also )?refer to/.test(x))return "I couldn't find a clear answer about "+t+".";
+return x}
+catch{return "I couldn't reach my knowledge base."}
+finally{clearTimeout(to)}}
+async function fallback(q,vis){st.busy=1;cap("Thinking…");try{const a=await lite(q,vis);st.follow=true;say(a)}catch{say("I couldn't work that out.");vib(400)}finally{st.busy=0}}
+async function ask(q,vis){
+if(st.busy)return;
+const qa=quick(q);if(qa){st.follow=true;return say(qa)}
+if(!BR.ready){
+if(BR.loading)return say("My brain is still loading, "+BR.pct+" percent. Give me a moment.");
+if(navigator.gpu&&!BR.paused&&BR.tries<3)loadBrain();
+return fallback(q,vis)}
+st.busy=1;st.gen=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
+hush();const my=beginSpeech();let buf="",sys=SYS(),pr=q;
+const sp=s=>{s=s.replace(/[*#_`~|]/g,"").replace(/\s+/g," ").trim();if(s)chunks(s).forEach(x=>enq(x,my))};
+if(vis){pr="[Camera object detector report: "+(det?(labels()||"nothing recognized"):"detector not loaded")+".]\n"+q;sys+=" You cannot see pictures. All you know about the camera view is the detector report in the user's message. Use it only if the question is about what the camera sees, and say so if it does not answer the question."}
+try{
+const raw=clean(await think({sys,q:pr,hist:st.hist,max:450,onText:(d,all)=>{if(my!==sid)return false;buf+=d;cap("E.V.: "+clean(all));let m;while((m=buf.match(/^([\s\S]*?[.!?])\s+/))){sp(m[1]);buf=buf.slice(m[0].length)}if(buf.length>240){const i=buf.lastIndexOf(", ",220);if(i>40){sp(buf.slice(0,i+1));buf=buf.slice(i+2)}}}}));
+if(my===sid){const a=raw||"I have no answer for that.";if(!raw)buf=a;sp(buf);buf="";cap("E.V.: "+a);
+if(raw){st.hist.push({role:"user",content:vis?"[camera] "+q:q},{role:"assistant",content:a});st.hist=st.hist.slice(-6)}
+st.follow=true;genDone=true;if(S.tts&&syn){if(pend<=0)fin(my)}else fol()}}
+catch(e){if(my===sid)say(brainErr(e));vib(400)}
+finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
+async function diag(){const o=$("#dg");o.textContent="Testing…";
+const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
+if(!navigator.gpu){o.textContent="Build 14. "+g+". This phone's browser can't run the on-device brain, so E.V. uses basic mode.";return}
+if(!BR.ready){o.textContent="Build 14. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 14. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 14. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+$("#b-di").onclick=diag;
+$("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
 async function cam(){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});
 V.srcObject=stream;await V.play();track=stream.getVideoTracks()[0];caps=track.getCapabilities?track.getCapabilities():{};
@@ -203,7 +232,7 @@ function tick(ts){if(!st.run)return;st.raf=requestAnimationFrame(tick);frames++;
 if(ts-t0>=1000){const f=frames*1000/(ts-t0);$("#fps").textContent=Math.round(f)+" FPS"+(adapt?` · ADAPT ${adapt}`:"");low=f<24?low+1:0;frames=0;t0=ts;if(low>=3){low=0;degrade()}}
 if(V.readyState<2)return;
 if(!(S.saver&&(skip^=1))){analyse(ts)}if(st.holo&&frames%(S.saver?3:2)===0)holo();
-if(ts-lastInf>(S.saver?300:infMs)&&det){lastInf=ts;try{const nb=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}));trk(nb,ts);st.boxes=nb}catch{}}
+if(ts-lastInf>(S.saver?300:infMs)&&det&&!st.gen){lastInf=ts;try{const nb=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}));trk(nb,ts);st.boxes=nb}catch{}}
 draw(ts);radar(ts)}
 function degrade(){adapt++;if(adapt===1)infMs=250;else if(adapt===2)document.body.classList.add("noglow");else infMs=500}
 function analyse(ts){sx.drawImage(V,0,0,160,90);const d=sx.getImageData(0,0,160,90).data,n=160*90,L=new Uint8Array(n);let mv=0;
@@ -242,7 +271,7 @@ if(m){m.u=1;const dt=(now-m.ts)/1000;b.rs=m.rs*.6+r*.4;b.v=dt>.05?m.v*.7+((m.rs-
 const info=b=>{const r=b.rs,br=st.heading!=null?" · BRG "+String(Math.round((st.heading+((b.x+b.w/2)/V.videoWidth-.5)*66+360)%360)).padStart(3,"0")+"°":"";return "~"+(r>=10?Math.round(r):r.toFixed(1))+"m"+br+(b.v>.8?" · CLOSING":b.v<-.8?" · RECEDING":"")};
 function setTac(on){st.tac=on;$("#b-tc").classList.toggle("on",on);say("Tactical data "+(on?"online":"off"))}
 /* intel: AI dossier on the locked target, shown as a holographic panel */
-const IS='You are the intelligence core of a heads-up display. Study the main object in the image and return ONLY a JSON object: {"name": specific name or best guess, max 4 words, "kind": category, max 3 words, "facts": [exactly 3 short punchy facts, max 12 words each, like origin, how it works, typical price or a surprising detail], "verdict": one dry witty line, max 12 words}. If the main subject is a person, do not identify them: use name "Person", kind "Human", and facts only about visible clothing, activity or setting. No markdown.';
+const IS='You write short intelligence dossiers for a heads-up display. The user gives the name of an object. Reply with ONLY a JSON object with exactly these keys: "name" (a specific name, max 4 words), "kind" (category, max 3 words), "facts" (an array of exactly 3 short true facts, max 14 words each, such as origin, how it works, or typical price), "verdict" (one dry witty line, max 12 words). If the object is a person, use name "Person", kind "Human" and give only general facts about people. No markdown.';
 let pTimer,pHide;
 function hidePanel(){clearInterval(pTimer);clearTimeout(pHide);$("#intel").classList.remove("on")}
 function showPanel(title,body){hidePanel();const P=$("#intel"),t=$("#it"),d=$("#ib"),n=title.length+body.length;let i=0;t.textContent="";d.textContent="";P.classList.add("on");
@@ -253,23 +282,24 @@ ox.beginPath();ox.moveTo(a.x,y);ox.lineTo(a.x+a.w,y);ox.stroke();ox.globalAlpha=
 async function intel(){
 if(!stream||V.readyState<2)return say("Camera link isn't ready.");
 if(st.busy)return;
-if(!navigator.onLine){say("I'm offline, so intel is unavailable.");vib(400);return}
+if(!BR.ready)return say(BR.loading?"My brain is still loading, "+BR.pct+" percent.":"My brain isn't loaded, so intel is unavailable.");
+if(!det)return say("Targeting isn't loaded yet, so I can't pick a target.");
 const W=V.videoWidth,H=V.videoHeight;let b=st.tgt;
 if(!b&&st.boxes.length){let bd=1e9;for(const x of st.boxes){const d=Math.hypot(x.x+x.w/2-W/2,x.y+x.h/2-H/2);if(d<bd){bd=d;b=x}}}
-let cx0=0,cy0=0,cw=W,ch=H;if(b){const pw=b.w*.15,ph=b.h*.15;cx0=Math.max(0,b.x-pw);cy0=Math.max(0,b.y-ph);cw=Math.min(W-cx0,b.w+pw*2);ch=Math.min(H-cy0,b.h+ph*2)}
-const k=Math.min(1,896/Math.max(cw,ch)),cv=document.createElement("canvas");cv.width=Math.round(cw*k);cv.height=Math.round(ch*k);cv.getContext("2d").drawImage(V,cx0,cy0,cw,ch,0,0,cv.width,cv.height);
-const img=cv.toDataURL("image/jpeg",.8).split(",")[1];
-st.busy=1;st.anl=b?{x:b.x,y:b.y,w:b.w,h:b.h,t:performance.now()}:{x:0,y:0,w:W,h:H,t:performance.now()};ping();hidePanel();$("#st").textContent="ANALYZING…";cap("Analyzing target…");vib([30,40,30]);
-ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),40000);
-try{const t=await llm({sys:IS,q:"Analyze the main object.",img,max:4096,json:true,signal:ctl.signal});
-const m=t.replace(/```json|```/g,"").match(/\{[\s\S]*\}/);if(!m)throw new Error("I couldn't read the intel.");
-const o=JSON.parse(m[0]),name=String(o.name||"Unknown").slice(0,40),kind=String(o.kind||"Unclassified").slice(0,30),facts=(Array.isArray(o.facts)?o.facts:[]).slice(0,3).map(f=>String(f).replace(/[.\s]+$/,"").slice(0,110)),verdict=String(o.verdict||"").slice(0,90);
+if(!b)return say("No target in view. Aim the reticle at something and try again.");
+const lab=b.l;
+st.busy=1;st.gen=1;st.anl={x:b.x,y:b.y,w:b.w,h:b.h,t:performance.now()};ping();hidePanel();$("#st").textContent="ANALYZING…";cap("Analyzing target…");vib([30,40,30]);
+try{const t=await think({sys:IS,q:"Object: "+lab,max:320,temp:.6,timeout:90000});
+let o=null;try{o=JSON.parse(t.replace(/```json|```/g,"").match(/\{[\s\S]*\}/)[0])}catch{}
+if(!o||typeof o!=="object"){const ls=t.replace(/[{}"\[\]]/g," ").split(/\n|(?<=[.!?])\s+/).map(x=>x.replace(/\s+/g," ").replace(/^\W+|\W+$/g,"")).filter(x=>x.length>12).slice(0,3);o={name:lab,kind:"Object",facts:ls,verdict:""}}
+const name=String(o.name||lab).slice(0,40),kind=String(o.kind||"Unclassified").slice(0,30),facts=(Array.isArray(o.facts)?o.facts:[]).slice(0,3).map(f=>String(f).replace(/[.\s]+$/,"").slice(0,110)),verdict=String(o.verdict||"").slice(0,90);
+if(!facts.length)throw new Error("empty intel");
 showPanel(name.toUpperCase(),"CLASS · "+kind.toUpperCase()+"\n\n"+facts.map(f=>"▸ "+f).join("\n")+(verdict?"\n\n» "+verdict:""));
 vib([40,50,40,50,120]);
-st.hist.push({role:"user",content:"[camera crop] Intel on the targeted object"},{role:"assistant",content:name+": "+facts.join(". ")});st.hist=st.hist.slice(-8);
+st.hist.push({role:"user",content:"[camera target] Intel on the "+lab},{role:"assistant",content:name+": "+facts.join(". ")});st.hist=st.hist.slice(-6);
 st.follow=true;say(name+". "+facts.slice(0,2).join(". ")+".")}
-catch(e){say(aiErr(e));vib(400)}
-finally{clearTimeout(to);st.busy=0;st.anl=null;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
+catch(e){say(brainErr(e));vib(400)}
+finally{st.busy=0;st.gen=0;st.anl=null;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 /* ---------- panels & back button ---------- */
 const stack=[];
 function openL(n){if(stack.includes(n))return;stack.push(n);$("#"+n).classList.add("on");history.pushState({n},"")}
@@ -279,17 +309,18 @@ $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
 $("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};
 /* ---------- settings ---------- */
-const sync=()=>{$("#s-voice").value=S.voice;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
+const sync=()=>{$("#s-voice").value=S.voice;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
 sync();
 $("#s-voice").onchange=e=>{S.voice=e.target.value;save();sync();pauseRec();want=S.voice==="wake"&&st.run;startRec()};
+$("#s-size").onchange=e=>{S.size=e.target.value;save();BR.paused=false;BR.tries=0;cap("Switching brain size. A download of about "+BS[S.size].mb+" starts if it is not saved on this phone yet.");swapBrain()};
 $("#s-tts").onchange=e=>{S.tts=e.target.checked;save()};$("#s-hap").onchange=e=>{S.hap=e.target.checked;save()};
 $("#s-bat").onchange=e=>{S.saver=e.target.checked;save();document.body.classList.toggle("noglow",S.saver||adapt>1)};
-$("#cap").onclick=()=>{const e=$("#cap");if(st.speaking){speechSynthesis.cancel();return}navigator.clipboard?.writeText(e.textContent).then(()=>{vib(15);e.style.borderColor="#fff";setTimeout(()=>e.style.borderColor="",250)}).catch(()=>{})};
+$("#cap").onclick=()=>{const e=$("#cap");if(st.speaking||st.gen){stopTalk();return}navigator.clipboard?.writeText(e.textContent).then(()=>{vib(15);e.style.borderColor="#fff";setTimeout(()=>e.style.borderColor="",250)}).catch(()=>{})};
 $("#ptt").addEventListener("pointerdown",()=>{want=true;startRec()});
 $("#ptt").addEventListener("pointerup",()=>{want=false;rec&&rec.stop()});
 /* ---------- lifecycle & install ---------- */
 async function start(){await cam();await wlock();st.run=true;want=S.voice==="wake";startRec();cancelAnimationFrame(st.raf);st.raf=requestAnimationFrame(tick)}
-function stop(){ctl&&ctl.abort();st.run=false;cancelAnimationFrame(st.raf);want=false;pauseRec();window.speechSynthesis?.cancel();stream?.getTracks().forEach(t=>t.stop());stream=null;prev=null}
+function stop(){stopTalk();st.run=false;cancelAnimationFrame(st.raf);want=false;pauseRec();window.speechSynthesis?.cancel();stream?.getTracks().forEach(t=>t.stop());stream=null;prev=null}
 document.addEventListener("visibilitychange",async()=>{if(!st.booted)return;if(document.hidden)stop();else{document.body.classList.add("recon");try{await start()}catch{cap("Camera link failed.")}setTimeout(()=>document.body.classList.remove("recon"),1300);say("Link restored.")}});
 const isApp=()=>["standalone","fullscreen"].some(m=>matchMedia(`(display-mode: ${m})`).matches);
 const hideInst=()=>{$("#inst").hidden=true};
@@ -300,5 +331,5 @@ if(isApp())hideInst();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("#go").onclick=async()=>{try{await document.documentElement.requestFullscreen({navigationUI:"hide"})}catch{}
 try{await screen.orientation.lock("landscape")}catch{}
-try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>say("E.V. online. Say E.V., then a command."))}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
+try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>{say("E.V. online. Say E.V., then a command.");setTimeout(autoBrain,4000)})}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
 </script></body></html>

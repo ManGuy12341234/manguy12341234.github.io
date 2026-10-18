@@ -39,9 +39,14 @@ Then `npx cap sync android`, `npx cap open android`, and in Android Studio choos
 ## C. APK via PWABuilder (recommended, free, no Play Store account)
 Runs on Chrome itself (a Trusted Web Activity), so voice keeps working, unlike the Capacitor route. For a fullscreen app with no address bar, the site must live at the root of `yourusername.github.io` and serve `/.well-known/assetlinks.json` (plus an empty `.nojekyll` file so GitHub Pages serves dot-folders). Package it at pwabuilder.com -> Package for stores -> Android, with a new signing key, then sideload the signed APK. Keep the keystore: you need it to update the APK later.
 
-## D. AI brain (Google Gemini)
-The Gemini API key is built into `index.html` (the `GKEY` constant near the top of the script), so there is no key box in Settings. Google's new Gemini keys start with `AQ.` (older ones start with `AIza`); both work. E.V. tries the newest Flash models in order (`gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-flash-latest`) and sends the key two ways if needed, then remembers what worked. If Google refuses, the exact status and reason appear in the text box.
+## D. AI brain (free, runs on the phone, no key)
+E.V. thinks with a free open model that runs inside the phone's browser (WebLLM + WebGPU). There is no API key, no account, no quota and no cloud AI: your questions are not sent to any AI service.
 
-**Important:** because the key is inside the page, anyone who can open your site can read it. Before you put this on a public host, restrict the key in Google AI Studio / Google Cloud Console (API restrictions: Generative Language API only; application restriction: your site's address) and set a spending cap. If it ever leaks, delete it there and paste a new one into `GKEY`.
+- **First launch:** after ENGAGE, E.V. downloads the model once and keeps it in the browser (Balanced about 0.7 GB, Fast about 0.25 GB, Best about 1.7 GB). Use Wi-Fi. If you are on mobile data and it is not saved yet, E.V. pauses and waits for you to tap Settings -> LOAD BRAIN. After the first download it works offline.
+- **Needs WebGPU:** Chrome 121+ on Android 12+ with a Qualcomm or ARM GPU. Without it, E.V. runs in basic mode: time, math, what the detector sees, and Wikipedia summaries (basic mode sends the question text to Wikipedia).
+- **Brain size (Settings):** Fast = SmolLM2 360M, Balanced = Llama 3.2 1B (default), Best = Llama 3.2 3B (needs a strong phone). If the phone runs out of memory, pick Fast. TEST BRAIN shows whether WebGPU works and which model is loaded.
+- **Compared with the old Gemini brain:** a small on-device model knows less and can be wrong, and it cannot see pictures. Camera questions use the object detector's list of what it sees (80 common categories), and Intel writes its dossier from the detected object's name. Time, date and math are answered instantly without the model.
+- E.V. pauses object detection while the brain is thinking so the GPU is free for it, and speaks each sentence as soon as it is written. Tap E.V.'s text box to stop her.
+- The model library is loaded from jsDelivr and the model files from Hugging Face, so the first run needs internet; the service worker and the browser cache keep them afterwards.
 
-Say "E.V., what is ..." for questions, or "E.V., tell me what I'm looking at" to send the camera view with the question.
+Say "E.V., what is ..." for questions, or "E.V., what am I looking at" for a camera question.
