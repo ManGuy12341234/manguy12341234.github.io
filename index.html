@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#02060a">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
-<title>E.V. Suit Interface</title>
+<title>E.D.I.T.H. Suit Interface</title>
 <style>
 :root{--c:#3df2ff;--r:#ff3d5a;--bg:#02060a;--f:ui-monospace,"Courier New",monospace}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -37,20 +37,22 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 .noglow *{text-shadow:none!important;box-shadow:none!important}
 #ed{display:none;mix-blend-mode:screen}body.holo #ed{display:block}body.holo #v{filter:brightness(.3) saturate(.3) contrast(1.2)}body.holo #stage::after{content:"";position:absolute;left:0;right:0;top:-20%;height:20%;background:linear-gradient(transparent,rgba(61,242,255,.28),transparent);pointer-events:none;animation:hs 3s linear infinite}@keyframes hs{to{top:100%}}
 #pulse{position:absolute;left:50%;top:50%;width:10vmin;height:10vmin;margin:-5vmin 0 0 -5vmin;border:2px solid var(--c);border-radius:50%;opacity:0;pointer-events:none}#pulse.go{animation:pl 1.3s ease-out}@keyframes pl{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(9)}}
+#sweep{position:absolute;left:0;right:0;top:0;height:3px;background:var(--c);box-shadow:0 0 16px 4px var(--c);opacity:0;pointer-events:none}#sweep.go{animation:sw 2.4s ease-in-out}@keyframes sw{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+#hud.test #top,#hud.test #ret,#hud.test #rad{animation:tf .5s steps(2) 4}@keyframes tf{50%{opacity:.2}}
 [hidden]{display:none!important}
 </style></head><body>
 <div id="stage"><video id="v" playsinline muted></video><canvas id="ed" width="320" height="180"></canvas><canvas id="ov"></canvas></div>
 <div id="hud"><div id="top"><span id="bat">BAT --</span><span id="hd">HDG ---°</span><span id="fps">-- FPS</span><span id="st">STANDBY</span></div>
-<div id="ret"></div><canvas id="rad" width="300" height="300"></canvas><div id="cap">E.V. standing by.</div><div id="ss"></div><div id="pulse"></div><div id="intel"><div id="it"></div><div id="ib"></div></div>
+<div id="ret"></div><canvas id="rad" width="300" height="300"></canvas><div id="cap">E.D.I.T.H. standing by.</div><div id="ss"></div><div id="pulse"></div><div id="sweep"></div><div id="intel"><div id="it"></div><div id="ib"></div></div>
 <button id="ptt" hidden>HOLD</button><button id="menu">☰ TOOLS</button></div>
-<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ho">HOLO VIEW</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-in">INTEL · AI</button><button id="b-tc" class="on">TACTICAL DATA</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
+<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ht">HUD TEST</button><button id="b-ho">HOLO VIEW</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-in">INTEL · AI</button><button id="b-tc" class="on">TACTICAL DATA</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
-<label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
+<label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.D.I.T.H.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
-<label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 14. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 15. Tap TEST BRAIN to check E.D.I.T.H.'s on-device brain.</small><small>E.D.I.T.H. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.D.I.T.H. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.D.I.T.H. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
-<small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 14</div></div>
+<small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.D.I.T.H.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
+<div id="boot"><h1>E.D.I.T.H.</h1><div>EVEN DEAD, I'M THE HERO</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.D.I.T.H.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 15</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
@@ -68,7 +70,7 @@ const syn=window.speechSynthesis;let voice;const pick=()=>{const v=syn.getVoices
 if(syn){pick();syn.addEventListener("voiceschanged",pick)}
 /* Speech is a queue of short utterances (Android Chrome drops long ones).
    sid = which spoken answer is current, pend = utterances still queued, genDone = no more text is coming for it.
-   Every callback checks sid, so a cancelled answer can never leave E.V. stuck "speaking". */
+   Every callback checks sid, so a cancelled answer can never leave E.D.I.T.H. stuck "speaking". */
 let sid=0,pend=0,genDone=true,lastSpeak=0,dueBy=0;
 const chunks=t=>{const o=[];let c="";for(const x of t.replace(/\s+/g," ").trim().split(/(?<=[.!?])\s+/)){if(c&&(c+" "+x).length>200){o.push(c);c=""}c=c?c+" "+x:x;while(c.length>260){let i=c.lastIndexOf(" ",240);if(i<1)i=240;o.push(c.slice(0,i).trim());c=c.slice(i).trim()}}if(c)o.push(c);return o};
 const fol=()=>{if(st.follow){st.follow=false;st.awake=Date.now()+8000}};
@@ -76,7 +78,7 @@ function fin(my){if(my!==sid||!st.speaking)return;st.speaking=false;fol();resume
 function enq(s,my){if(my!==sid)return;lastSpeak=Date.now();if(!S.tts||!syn)return;const u=new SpeechSynthesisUtterance(s);if(voice){u.voice=voice;u.lang=voice.lang}u.pitch=1.05;pend++;dueBy=Math.max(dueBy,Date.now())+s.length*90+1500;const x=()=>{if(my!==sid)return;pend--;if(pend<=0&&genDone)fin(my)};u.onend=x;u.onerror=x;syn.speak(u)}
 function hush(){if(syn&&(syn.speaking||syn.pending)){syn.cancel();return true}return false}
 function beginSpeech(){const my=++sid;pend=0;genDone=false;lastSpeak=Date.now();dueBy=Date.now();if(S.tts&&syn){st.speaking=true;pauseRec()}return my}
-function say(t,k){if(!k)cap("E.V.: "+t);const ch=chunks(t);if(!ch.length)return;if(!S.tts||!syn){fol();return}const waited=hush(),my=beginSpeech();genDone=true;const go=()=>{if(my===sid)ch.forEach(s=>enq(s,my))};waited?setTimeout(go,90):go()}
+function say(t,k){if(!k)cap("E.D.I.T.H.: "+t);const ch=chunks(t);if(!ch.length)return;if(!S.tts||!syn){fol();return}const waited=hush(),my=beginSpeech();genDone=true;const go=()=>{if(my===sid)ch.forEach(s=>enq(s,my))};waited?setTimeout(go,90):go()}
 function stopTalk(){sid++;pend=0;genDone=true;const g=st.gen;if(syn)syn.cancel();if(g&&BR.eng)BR.eng.interruptGenerate().catch(()=>{});if(st.speaking){st.speaking=false;resumeRec()}}
 /* watchdog: recovers if the speech engine goes quiet without telling us, or if the mic is not listening when it should be */
 setInterval(()=>{if(!st.run)return;const n=Date.now();
@@ -93,8 +95,8 @@ rec.onend=()=>{rec=null;delay=Date.now()-recStart>3000?300:Math.min(delay*2,3000
 try{rec.start()}catch{rec=null}}
 function pauseRec(){clearTimeout(timer);if(rec){const r=rec;rec=null;r.onend=null;try{r.abort()}catch{}}}
 function resumeRec(){clearTimeout(timer);if(S.voice==="wake")timer=setTimeout(startRec,300)}
-function hear(t){t=t.toLowerCase().trim();cap("“"+t+"”");let c;const m=t.match(/\b(e\.?\s?v\.?|evie|eevee|eevie)\b[,\s]*(.*)$/);
-if(S.voice==="hold")c=t;else if(m){c=m[2];st.awake=Date.now()+6000;if(!c)return say("Online.")}else if(Date.now()<st.awake)c=t;else return;cmd(c)}
+function hear(t){t=t.toLowerCase().trim();cap("“"+t+"”");let c;const m=t.match(/\b(e\.?\s?d\.?\s?i\.?\s?t\.?\s?h\.?|edith|edeth|e\.?\s?v\.?|evie|eevee|eevie|eve)\b[,\s]*(.*)$/);
+if(S.voice==="hold")c=t;else if(m){c=m[2];st.awake=Date.now()+6000;if(!c)return say("Yes, Peter?")}else if(Date.now()<st.awake)c=t;else return;cmd(c)}
 const VIS=/\b(this|these|those|here|see|seeing|look|looking|looks|read (this|that|it)|identify|describe|camera|holding|in front of me|around me|what'?s that|what is that|what are those)\b/;
 function cmd(c){c=c.toLowerCase().replace(/[,.?!]/g,"").trim();if(!c)return;
 const k=c.replace(/\b(please|the|my|turn|switch|set|to)\b/g,"").replace(/\btwo\b/,"2").replace(/\bfour\b/,"4").replace(/\bone\b/,"1").replace(/\s+/g," ").trim();let m;
@@ -105,6 +107,10 @@ if(/^spider.?sense( on| off)?$|^(on|off) spider.?sense$/.test(k)){st.sense=!/off
 if(/^(intel|dossier|target intel|analy[sz]e( target| that| this| it| object)?|deep scan|scan target|identify target)$/.test(k))return intel();
 if(/^(tactical|tac)( data| mode| view| hud)?( on| off)?$|^(on|off) tactical( data| mode)?$/.test(k))return setTac(!/off/.test(k));
 if(/^(scan|ping|sweep)( area| around| surroundings)?$/.test(k))return scan();
+if(/^(hud|display|systems?|diagnostics?)( test| check)?$|^(test|check|run) (hud|display|systems?|diagnostics?)$/.test(k))return hudTest();
+if(/^(mark|lock|acquire|target)( target| that| this| it| object)?$/.test(k))return mark();
+if(/^(drone strike|strike|fire drones?|launch drones?)( target)?$/.test(k))return strike();
+if(/^(cancel|abort|stand down)( strike| that| it)?$/.test(k)){hidePanel();return say("Standing down.")}
 if(/^(battery|power|status)( level| status)?$/.test(k))return say(bat?`Power at ${Math.round(bat.level*100)} percent${bat.charging?", charging":""}.`:"Power telemetry unavailable.");
 ask(c,VIS.test(c))}
 /* ---------- brain: a free open model that runs on this phone (WebLLM + WebGPU). No key, no account, no cloud AI. ---------- */
@@ -112,7 +118,7 @@ const WL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.85/+esm";
 const BS={fast:{re:/^SmolLM2-360M-Instruct-q4f(16|32)_1-MLC$/,mb:"250 MB"},balanced:{re:/^Llama-3\.2-1B-Instruct-q4f(16|32)_1-MLC$/,mb:"700 MB"},best:{re:/^Llama-3\.2-3B-Instruct-q4f(16|32)_1-MLC$/,mb:"1.7 GB"}};
 if(!BS[S.size])S.size="balanced";
 const BR={W:null,eng:null,id:"",ready:false,loading:null,err:"",pct:0,paused:false,tries:0};
-const SYS=()=>{const n=new Date();return "You are E.V., a voice assistant inside a heads-up display on the user's phone. Today is "+n.toLocaleDateString([],{weekday:"long",year:"numeric",month:"long",day:"numeric"})+" and the time is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+". Your reply is spoken aloud, so use plain spoken sentences: no markdown, lists, emoji or symbols. Answer the question directly and completely from your own knowledge. Never tell the user to search the web, open a browser, check a website or open an app. Give simple answers in one or two sentences, and explain bigger questions clearly in a short paragraph. If you are not sure of a fact, say so briefly instead of guessing. Do not identify people from their faces."};
+const SYS=()=>{const n=new Date();return "You are E.D.I.T.H. (Even Dead, I'm The Hero), Tony Stark's calm, precise tactical AI, speaking through a heads-up display to Peter Parker. Today is "+n.toLocaleDateString([],{weekday:"long",year:"numeric",month:"long",day:"numeric"})+" and the time is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+". Your reply is spoken aloud, so use plain spoken sentences: no markdown, lists, emoji or symbols. Answer the question directly and completely from your own knowledge. Never tell the user to search the web, open a browser, check a website or open an app. Give simple answers in one or two sentences, and explain bigger questions clearly in a short paragraph. If you are not sure of a fact, say so briefly instead of guessing. Do not identify people from their faces."};
 const clean=s=>s.replace(/[*#_`]/g,"").trim();
 const labels=()=>{const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);const l=Object.entries(c).map(([k,v])=>v>1?v+" "+k+"s":"a "+k);return l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:(l[0]||"")};
 const lib=async()=>BR.W||(BR.W=await import(WL));
@@ -138,7 +144,7 @@ catch(e){BR.err=String(e&&e.message||e).slice(0,140);return false}
 async function swapBrain(){if(BR.loading)await BR.loading.catch(()=>{});const e=BR.eng;BR.ready=false;BR.eng=null;BR.id="";try{e&&await e.unload()}catch{}return loadBrain()}
 /* start loading after ENGAGE, but never download a big model on mobile data without asking */
 async function autoBrain(){
-if(!navigator.gpu){cap("This phone's browser has no WebGPU, so E.V. runs in basic mode.");return}
+if(!navigator.gpu){cap("This phone's browser has no WebGPU, so E.D.I.T.H. runs in basic mode.");return}
 try{const W=await lib(),ids=await pickIds(),c=navigator.connection,metered=!!c&&(c.saveData||c.type==="cellular");let cached=false;try{cached=!!ids.length&&await W.hasModelInCache(ids[0])}catch{}
 if(!cached&&metered){BR.paused=true;say("My brain needs a one time download of about "+BS[S.size].mb+". You're on mobile data, so I paused it. Open Tools, Settings, then Load Brain when you're on Wi-Fi.");return}}
 catch(e){BR.err="Could not load the brain library. Open the app once online.";cap(BR.err);return}
@@ -154,8 +160,9 @@ return full}
 const brainErr=e=>{const m=String(e&&e.message||e);if(/lost|memory|OOM|allocat|device/i.test(m)){BR.ready=false;BR.eng=null;BR.err="GPU memory or device lost";return "My on-device brain ran out of memory. Try the Fast brain in Settings."}return "My brain hit an error. Try asking again."};
 /* instant answers that never need the model (a small model is bad at math and clocks) */
 function quick(q){const s=q.toLowerCase().replace(/[?!]/g,"").replace(/\s+/g," ").trim(),n=new Date();
-if(/^(hi|hello|hey)$/.test(s))return "Online and listening.";
-if(/^(who|what) are you$|^what'?s your name$/.test(s))return "I'm E.V., the voice assistant in your suit interface.";
+if(/^(hi|hello|hey)$/.test(s))return "Hello, Peter.";
+if(/^(who|what) are you$|^what'?s your name$/.test(s))return "I'm E.D.I.T.H. Even Dead, I'm The Hero. Tony Stark's tactical intelligence system, at your service.";
+if(/^(help|commands|what can you do)$/.test(s))return "Try HUD test, scan, intel, target, tactical, holo view, flashlight, zoom, or battery.";
 if(/^how are you/.test(s))return "All systems nominal.";
 if(/^(what('?s| is)( the)? (time|date|day)|what time|what day|what'?s today|today'?s date)/.test(s)){
 if(/date|day|today/.test(s))return "Today is "+n.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric",year:"numeric"})+".";
@@ -191,18 +198,18 @@ hush();const my=beginSpeech();let buf="",sys=SYS(),pr=q;
 const sp=s=>{s=s.replace(/[*#_`~|]/g,"").replace(/\s+/g," ").trim();if(s)chunks(s).forEach(x=>enq(x,my))};
 if(vis){pr="[Camera object detector report: "+(det?(labels()||"nothing recognized"):"detector not loaded")+".]\n"+q;sys+=" You cannot see pictures. All you know about the camera view is the detector report in the user's message. Use it only if the question is about what the camera sees, and say so if it does not answer the question."}
 try{
-const raw=clean(await think({sys,q:pr,hist:st.hist,max:450,onText:(d,all)=>{if(my!==sid)return false;buf+=d;cap("E.V.: "+clean(all));let m;while((m=buf.match(/^([\s\S]*?[.!?])\s+/))){sp(m[1]);buf=buf.slice(m[0].length)}if(buf.length>240){const i=buf.lastIndexOf(", ",220);if(i>40){sp(buf.slice(0,i+1));buf=buf.slice(i+2)}}}}));
-if(my===sid){const a=raw||"I have no answer for that.";if(!raw)buf=a;sp(buf);buf="";cap("E.V.: "+a);
+const raw=clean(await think({sys,q:pr,hist:st.hist,max:450,onText:(d,all)=>{if(my!==sid)return false;buf+=d;cap("E.D.I.T.H.: "+clean(all));let m;while((m=buf.match(/^([\s\S]*?[.!?])\s+/))){sp(m[1]);buf=buf.slice(m[0].length)}if(buf.length>240){const i=buf.lastIndexOf(", ",220);if(i>40){sp(buf.slice(0,i+1));buf=buf.slice(i+2)}}}}));
+if(my===sid){const a=raw||"I have no answer for that.";if(!raw)buf=a;sp(buf);buf="";cap("E.D.I.T.H.: "+a);
 if(raw){st.hist.push({role:"user",content:vis?"[camera] "+q:q},{role:"assistant",content:a});st.hist=st.hist.slice(-6)}
 st.follow=true;genDone=true;if(S.tts&&syn){if(pend<=0)fin(my)}else fol()}}
 catch(e){if(my===sid)say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
 const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
-if(!navigator.gpu){o.textContent="Build 14. "+g+". This phone's browser can't run the on-device brain, so E.V. uses basic mode.";return}
-if(!BR.ready){o.textContent="Build 14. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
-try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 14. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
-catch(e){o.textContent="Build 14. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+if(!navigator.gpu){o.textContent="Build 15. "+g+". This phone's browser can't run the on-device brain, so E.D.I.T.H. uses basic mode.";return}
+if(!BR.ready){o.textContent="Build 15. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 15. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 15. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
 $("#b-di").onclick=diag;
 $("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
@@ -250,7 +257,7 @@ function radar(ts){const R=150;rx.clearRect(0,0,300,300);rx.strokeStyle=rx.fillS
 for(const r of[1,.66,.33]){rx.beginPath();rx.arc(R,R,r*(R-8),0,7);rx.stroke()}
 const a=ts/1500%(Math.PI*2);rx.globalAlpha=.5;rx.beginPath();rx.moveTo(R,R);rx.lineTo(R+Math.sin(a)*(R-8),R-Math.cos(a)*(R-8));rx.stroke();
 if(st.heading!=null){const h=-st.heading*Math.PI/180;rx.globalAlpha=1;rx.fillText("N",R+Math.sin(h)*(R-20)-5,R-Math.cos(h)*(R-20)+5)}
-rx.fillStyle="#ff3d5a";rx.globalAlpha=1;const z=parseFloat($("#stage").style.transform.replace(/\D/g,""))||1;
+rx.fillStyle="#ff3d5a";rx.globalAlpha=1;const z=parseFloat(($("#stage").style.transform.match(/[\d.]+/)||[])[0])||1;
 for(const b of st.boxes){const ar=b.w*b.h/(V.videoWidth*V.videoHeight),br=((b.x+b.w/2)/V.videoWidth-.5)*66*Math.PI/180/z,r=Math.max(.2,Math.min(.95,1.05-Math.sqrt(ar)*1.6))*(R-8);
 rx.beginPath();rx.arc(R+Math.sin(br)*r,R-Math.cos(br)*r,7,0,7);rx.fill()}}
 /* ---------- scan pulse / tactical / intel ---------- */
@@ -300,6 +307,15 @@ st.hist.push({role:"user",content:"[camera target] Intel on the "+lab},{role:"as
 st.follow=true;say(name+". "+facts.slice(0,2).join(". ")+".")}
 catch(e){say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;st.anl=null;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
+/* E.D.I.T.H. film-style commands: HUD test, target acquisition, simulated drone strike */
+function hudTest(){const f=(a,b)=>"▸ "+a+" "+".".repeat(Math.max(2,15-a.length))+" "+b,h=$("#hud"),w=$("#sweep");
+const L=[["DISPLAY","OK"],["OPTICS",V.videoWidth?V.videoWidth+"X"+V.videoHeight:"NO LINK"],["TARGETING",det?"ONLINE":"MOTION ONLY"],["COMPASS",st.heading!=null?Math.round(st.heading)+"°":"NO SIGNAL"],["POWER",bat?Math.round(bat.level*100)+"%":"N/A"],["AI CORE",BR.ready?"ONLINE":BR.loading?"LOADING "+BR.pct+"%":"BASIC"],["VOICE",rec?"LISTENING":"STANDBY"],["DRONE UPLINK","STANDBY"]];
+for(const x of[h,w]){x.classList.remove("test","go");void x.offsetWidth}h.classList.add("test");w.classList.add("go");ping();vib([40,60,40,60,40]);
+showPanel("HUD TEST",L.map(x=>f(...x)).join("\n")+"\n\n» "+(det?"ALL SYSTEMS NOMINAL":"TARGETING OFFLINE"));
+say("HUD test complete. "+(det?"All systems nominal.":"Targeting is offline."))}
+function mark(){const b=st.tgt;ping();if(!b){vib(60);return say("No target in the reticle.")}
+vib([40,60,40]);showPanel("TARGET ACQUIRED","CLASS · "+b.l.toUpperCase()+(b.rs?"\nRANGE · ~"+Math.round(b.rs)+" M":"")+"\nSTATUS · TRACKING");say("Target acquired. "+b.l+".")}
+function strike(){const b=st.tgt;ping();vib([80,40,80,40,200]);showPanel("DRONE STRIKE","SIMULATED · NO DRONES LINKED\nTARGET · "+(b?b.l.toUpperCase():"NONE")+"\n\n» STRIKE ABORTED");say("Drone strike simulated. No drones are linked. Standing down.")}
 /* ---------- panels & back button ---------- */
 const stack=[];
 function openL(n){if(stack.includes(n))return;stack.push(n);$("#"+n).classList.add("on");history.pushState({n},"")}
@@ -307,7 +323,7 @@ addEventListener("popstate",()=>{const n=stack.pop();if(n)$("#"+n).classList.rem
 document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>stack.length&&history.back());
 $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
-$("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};
+$("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};$("#b-ht").onclick=()=>{stack.length&&history.back();hudTest()};
 /* ---------- settings ---------- */
 const sync=()=>{$("#s-voice").value=S.voice;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
 sync();
@@ -331,5 +347,5 @@ if(isApp())hideInst();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("#go").onclick=async()=>{try{await document.documentElement.requestFullscreen({navigationUI:"hide"})}catch{}
 try{await screen.orientation.lock("landscape")}catch{}
-try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>{say("E.V. online. Say E.V., then a command.");setTimeout(autoBrain,4000)})}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
+try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>{say("Hello, Peter. E.D.I.T.H. online. Even Dead, I'm The Hero. Say E.D.I.T.H., then a command, or try HUD test.");setTimeout(autoBrain,4000)})}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
 </script></body></html>
