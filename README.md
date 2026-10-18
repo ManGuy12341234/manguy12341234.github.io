@@ -54,3 +54,9 @@ Say "E.V., what is ..." for questions, or "E.V., what am I looking at" for a cam
 
 ## E. CPU brain
 Settings -> Brain engine: **Auto** uses the phone GPU (WebGPU) when it works and falls back to a CPU brain (llama.cpp WASM via wllama, SmolLM2 360M, about 390 MB first download) when it does not, or after a GPU error. **CPU only** forces it. CPU is slower because GitHub Pages cannot enable multi-threading.
+
+## F. Voice and Note 20 5G
+The wake word accepts anything that sounds like "E.V." (ev, eve, evie, eevee, ee vee, ivy...) and checks the 3 best guesses Chrome returns. Chrome's speech recognition needs an internet connection. For best results on a Samsung: Settings -> Apps -> Chrome -> Battery -> Unrestricted, and allow the microphone for the site.
+
+## G. Better brain
+Settings -> Brain engine -> **Cloud (my API key)**: paste a free key from aistudio.google.com (Gemini) or console.groq.com (Groq). Gemini can also see the camera frame for "what am I looking at". Your questions are sent to that service. The **CPU model** box accepts any Hugging Face GGUF as `owner/repo:file.gguf`; the default CPU brain is now Qwen2.5 1.5B (about 1.1 GB).
