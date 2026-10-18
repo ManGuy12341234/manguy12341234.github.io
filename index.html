@@ -53,24 +53,25 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
-<label>Brain engine<select id="s-eng"><option value="auto">Auto: GPU, else CPU</option><option value="cpu">CPU only</option><option value="cloud">Cloud (my API key)</option></select></label>
+<label>My name<input id="s-nm" placeholder="Peter"></label><label>Brain engine<select id="s-eng"><option value="auto">Auto: GPU, else CPU</option><option value="cpu">CPU only</option><option value="cloud">Cloud (my API key)</option></select></label>
 <label>Cloud service<select id="s-cp"><option value="gemini">Google Gemini (free key)</option><option value="groq">Groq (free key)</option><option value="openrouter">OpenRouter</option><option value="custom">Custom</option></select></label>
 <label>API key<input id="s-ck" type="password" autocomplete="off" placeholder="paste key"></label><label>Model<input id="s-cm"></label><label>Endpoint<input id="s-cu"></label>
 <label>CPU model<input id="s-gg" placeholder="owner/repo:file.gguf"></label><label>Extra wake words<input id="s-ww" placeholder="easy, tv, ..."></label>
-<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 20. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 21. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 20</div></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 21</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
-const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto",ckey:"",cprov:"gemini",curl:"https://generativelanguage.googleapis.com/v1beta/openai",cmodel:"gemini-flash-latest",gguf:"",ww:""};
+const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto",ckey:"",cprov:"gemini",curl:"https://generativelanguage.googleapis.com/v1beta/openai",cmodel:"gemini-flash-latest",gguf:"",ww:"",name:"Peter"};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 delete S.key;delete S.model;
 const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
 const st={tac:true,tgt:null,anl:null,run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,gen:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
 let stream,track,caps={},det,wl,deferred,bat,warned=0,infMs=100,adapt=0,low=0,frames=0,t0=performance.now(),lastInf=0,lastAlert=0,prev,skip=0;
 const MODEL="https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",MP="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/";
+const nm=()=>S.name?", "+S.name:"";
 const vib=p=>{if(S.hap&&navigator.vibrate)try{navigator.vibrate(p)}catch{}};
 const cap=t=>{$("#cap").textContent=t};
 /* ---------- speech out ---------- */
@@ -109,7 +110,7 @@ const xw=()=>{const l=(S.ww||"").toLowerCase().split(/[,;]+/).map(x=>x.trim().re
 const wk=t=>{t=t.trim();let m=t.match(WK);if(!m&&t.split(/\s+/).length<=8)m=t.match(WLK)||(XW&&t.match(XW));return m?t.slice(m.index+m[0].length).replace(/^[\s,.:;-]+/,""):null};
 const pickAlt=r=>{for(let k=0;k<r.length;k++)if(wk(r[k].transcript.toLowerCase())!==null)return r[k].transcript;return r[0].transcript};
 function hear(t){t=t.toLowerCase().trim();cap("“"+t+"”");let c;const w=S.voice==="hold"?null:wk(t);
-if(S.voice==="hold")c=t;else if(w!==null){c=w;st.awake=Date.now()+10000;if(!c)return say("Yes, Peter?")}else if(Date.now()<st.awake)c=t;else return;cmd(c)}
+if(S.voice==="hold")c=t;else if(w!==null){c=w;st.awake=Date.now()+10000;if(!c)return say("Yes"+nm()+"?")}else if(Date.now()<st.awake)c=t;else return;cmd(c)}
 const VIS=/\b(this|these|those|here|see|seeing|look|looking|looks|read (this|that|it)|identify|describe|camera|holding|in front of me|around me|what'?s that|what is that|what are those)\b/;
 function cmd(c){c=c.toLowerCase().replace(/[,.?!]/g,"").trim();if(!c)return;
 const k=c.replace(/\b(please|the|my|turn|switch|set|to)\b/g,"").replace(/\btwo\b/,"2").replace(/\bfour\b/,"4").replace(/\bone\b/,"1").replace(/\s+/g," ").trim();let m;
@@ -124,6 +125,7 @@ if(/^(hud|display|systems?|diagnostics?)( test| check)?$|^(test|check|run) (hud|
 if(/^(mark|lock|acquire|target)( target| that| this| it| object)?$/.test(k))return mark();
 if(/^(drone strike|strike|fire drones?|launch drones?)( target)?$/.test(k))return strike();
 if(/^(cancel|abort|stand down)( strike| that| it)?$/.test(k)){hidePanel();return say("Standing down.")}
+if(m=c.match(/^(?:call me|my name is)\s+([a-z][a-z' -]{0,19})$/)){S.name=m[1].replace(/\b[a-z]/g,x=>x.toUpperCase());save();$("#s-nm").value=S.name;return say("Understood. I will call you "+S.name+".")}
 if(/^(battery|power|status)( level| status)?$/.test(k))return say(bat?`Power at ${Math.round(bat.level*100)} percent${bat.charging?", charging":""}.`:"Power telemetry unavailable.");
 ask(c,VIS.test(c))}
 /* ---------- brain: a free open model that runs on this phone (WebLLM + WebGPU). No key, no account, no cloud AI. ---------- */
@@ -131,7 +133,7 @@ const WL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.85/+esm";
 const BS={fast:{re:/^SmolLM2-360M-Instruct-q4f(16|32)_1-MLC$/,mb:"250 MB"},balanced:{re:/^Llama-3\.2-1B-Instruct-q4f(16|32)_1-MLC$/,mb:"700 MB"},best:{re:/^Llama-3\.2-3B-Instruct-q4f(16|32)_1-MLC$/,mb:"1.7 GB"}};
 if(!BS[S.size])S.size="balanced";
 const BR={W:null,eng:null,id:"",ready:false,loading:null,err:"",pct:0,paused:false,tries:0};
-const SYS=()=>{const n=new Date();return "You are E.V., a calm, precise tactical AI speaking through a heads-up display to Peter Parker. Today is "+n.toLocaleDateString([],{weekday:"long",year:"numeric",month:"long",day:"numeric"})+" and the time is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+". Your reply is spoken aloud, so use plain spoken sentences: no markdown, lists, emoji or symbols. Answer the question directly and completely from your own knowledge. Never tell the user to search the web, open a browser, check a website or open an app. Give simple answers in one or two sentences, and explain bigger questions clearly in a short paragraph. If you are not sure of a fact, say so briefly instead of guessing. Do not identify people from their faces."};
+const SYS=()=>{const n=new Date();return "You are E.V., a calm, precise tactical AI speaking through a heads-up display to "+(S.name||"the user")+". Address the user by that name now and then. Today is "+n.toLocaleDateString([],{weekday:"long",year:"numeric",month:"long",day:"numeric"})+" and the time is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+". Your reply is spoken aloud, so use plain spoken sentences: no markdown, lists, emoji or symbols. Answer the question directly and completely from your own knowledge. Never tell the user to search the web, open a browser, check a website or open an app. Give simple answers in one or two sentences, and explain bigger questions clearly in a short paragraph. If you are not sure of a fact, say so briefly instead of guessing. Do not identify people from their faces."};
 const clean=s=>s.replace(/[*#_`]/g,"").trim();
 const labels=()=>{const c={};st.boxes.forEach(b=>c[b.l]=(c[b.l]||0)+1);const l=Object.entries(c).map(([k,v])=>v>1?v+" "+k+"s":"a "+k);return l.length>1?l.slice(0,-1).join(", ")+" and "+l[l.length-1]:(l[0]||"")};
 const lib=async()=>BR.W||(BR.W=await import(WL));
@@ -210,7 +212,7 @@ return full}
 const brainErr=e=>{const m=String(e&&e.message||e);if(/^Cloud (401|403)/.test(m))return "The cloud service rejected your API key. Check it in Settings.";if(/^Cloud 429/.test(m))return "The cloud service is rate limited. Try again in a moment.";if(/^Cloud 4/.test(m))return "The cloud service refused the request: "+m.slice(0,90);if(BR.eng&&BR.eng.cloud&&/fetch|network/i.test(m))return "I can't reach the cloud brain. Check your internet.";if(/lost|memory|OOM|allocat|device/i.test(m)){BR.ready=false;BR.eng=null;BR.err="GPU memory or device lost";return "My on-device brain ran out of memory. Try the Fast brain in Settings."}return "My brain hit an error. Try asking again."};
 /* instant answers that never need the model (a small model is bad at math and clocks) */
 function quick(q){const s=q.toLowerCase().replace(/[?!]/g,"").replace(/\s+/g," ").trim(),n=new Date();
-if(/^(hi|hello|hey)$/.test(s))return "Hello, Peter.";
+if(/^(hi|hello|hey)$/.test(s))return "Hello"+nm()+".";
 if(/^(who|what) are you$|^what'?s your name$/.test(s))return "I'm E.V., the tactical intelligence system in your suit interface.";
 if(/^(help|commands|what can you do)$/.test(s))return "Try HUD test, scan, intel, target, tactical, holo view, flashlight, zoom, or battery.";
 if(/^how are you/.test(s))return "All systems nominal.";
@@ -257,10 +259,10 @@ catch(e){if(my===sid)say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
 const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
-if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 20. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
-if(!BR.ready){o.textContent="Build 20. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
-try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 20. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
-catch(e){o.textContent="Build 20. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 21. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
+if(!BR.ready){o.textContent="Build 21. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 21. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 21. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
 $("#b-di").onclick=diag;
 $("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
@@ -376,10 +378,11 @@ $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
 $("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};$("#b-ht").onclick=()=>{stack.length&&history.back();hudTest()};
 /* ---------- settings ---------- */
-const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-cp").value=S.cprov;$("#s-ck").value=S.ckey;$("#s-cm").value=S.cmodel;$("#s-cu").value=S.curl;$("#s-gg").value=S.gguf;$("#s-ww").value=S.ww;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
+const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-cp").value=S.cprov;$("#s-ck").value=S.ckey;$("#s-cm").value=S.cmodel;$("#s-cu").value=S.curl;$("#s-gg").value=S.gguf;$("#s-ww").value=S.ww;$("#s-nm").value=S.name;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
 sync();
 $("#s-voice").onchange=e=>{S.voice=e.target.value;save();sync();pauseRec();want=S.voice==="wake"&&st.run;startRec()};
 $("#s-ww").onchange=e=>{S.ww=e.target.value;save();XW=xw()};
+$("#s-nm").onchange=e=>{S.name=e.target.value.trim().slice(0,20);save()};
 $("#s-eng").onchange=e=>{S.engine=e.target.value;save();BR.noGpu=false;BR.paused=false;BR.tries=0;cap("Switching brain engine.");swapBrain()};
 const CP={gemini:["https://generativelanguage.googleapis.com/v1beta/openai","gemini-flash-latest"],groq:["https://api.groq.com/openai/v1","llama-3.3-70b-versatile"],openrouter:["https://openrouter.ai/api/v1","meta-llama/llama-3.3-70b-instruct:free"]};
 const rebrain=()=>{BR.noGpu=false;BR.paused=false;BR.tries=0;swapBrain()};
@@ -404,5 +407,5 @@ if(isApp())hideInst();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("#go").onclick=async()=>{try{await document.documentElement.requestFullscreen({navigationUI:"hide"})}catch{}
 try{await screen.orientation.lock("landscape")}catch{}
-try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>{say("Hello, Peter. E.V. online.. Say E.V., then a command, or try HUD test.");setTimeout(autoBrain,4000)})}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
+try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>{say("Hello"+nm()+". E.V. online. Say E.V., then a command, or try HUD test.");setTimeout(autoBrain,4000)})}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
 </script></body></html>

@@ -63,3 +63,6 @@ Settings -> Brain engine -> **Cloud (my API key)**: paste a free key from aistud
 
 ## H. Wake words
 Besides E.V., E.V. also wakes on sound-alikes at the start of a phrase (easy, tv, ez, ebay, ivy...). Anything else she mishears: Settings -> Extra wake words (comma separated). The text box shows what Chrome heard.
+
+## I. Your name
+Settings -> My name, or say "E.V., call me Tony". Leave it empty and E.V. will not use a name.
