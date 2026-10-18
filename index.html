@@ -49,14 +49,14 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
-<label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 16. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<label>Brain engine<select id="s-eng"><option value="auto">Auto: GPU, else CPU</option><option value="cpu">CPU only</option></select></label><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 17. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Holo view draws glowing outlines of everything the camera sees over a dimmed picture. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 16</div></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 17</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
-const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced"};
+const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto"};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 delete S.key;delete S.model;
 const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
@@ -129,32 +129,44 @@ let ids=list.filter(i=>BS[S.size].re.test(i));
 if(!ids.length)ids=list.filter(i=>/(Llama-3\.2-1B|SmolLM2-360M)-Instruct-q4f(16|32)_1-MLC$/.test(i));
 return ids.sort((a,b)=>(pref.test(a)?0:1)-(pref.test(b)?0:1))}
 const prog=p=>{BR.pct=Math.round((p.progress||0)*100);$("#st").textContent="BRAIN "+BR.pct+"%";if(!st.speaking&&!st.busy)cap("Loading my brain, "+BR.pct+"%. "+String(p.text||"").slice(0,70))};
+/* CPU brain: llama.cpp compiled to WASM (wllama). Runs on any phone, no GPU needed, slower. */
+const WC="https://cdn.jsdelivr.net/npm/@wllama/wllama@2.2.1/esm/",SM=["HuggingFaceTB/SmolLM2-360M-Instruct-GGUF","smollm2-360m-instruct-q8_0.gguf"],CM={fast:SM,balanced:SM,best:["bartowski/Llama-3.2-1B-Instruct-GGUF","Llama-3.2-1B-Instruct-Q4_K_M.gguf"]};
+async function cpuBrain(){try{cap("Loading the CPU brain. It works on any phone but is slower.");
+const M=await import(WC+"index.js"),P=(await import(WC+"wasm-from-cdn.js")).default,w=new M.Wllama(P),[r,f]=CM[S.size]||SM;
+await w.loadModelFromHF(r,f,{n_ctx:2048,progressCallback:({loaded,total})=>prog({progress:total?loaded/total:0,text:"CPU brain"})});
+BR.eng={cpu:w,interruptGenerate:async()=>{BR.abort=true},resetChat:async()=>{},unload:async()=>{await w.exit()}};BR.id="CPU "+f;BR.ready=true;BR.err="";
+$("#st").textContent=det?"TARGETING ONLINE":"ONLINE";cap("Brain online (CPU).");vib([30,40,30]);return true}
+catch(e){BR.eng=null;BR.err="CPU brain: "+String(e&&e.message||e).slice(0,120);return false}}
 async function loadBrain(){
 if(BR.ready)return true;if(BR.loading)return BR.loading;
 return BR.loading=(async()=>{
 BR.err="";BR.tries++;
-if(!navigator.gpu){BR.err="This browser has no WebGPU.";return false}
-try{const ids=await pickIds();if(!ids.length){BR.err="No model of that size in this library version.";return false}
+if(!navigator.gpu||S.engine==="cpu"||BR.noGpu)return cpuBrain();
+try{const ids=await pickIds();if(!ids.length)return cpuBrain();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 for(const id of ids){try{BR.eng=await BR.W.CreateMLCEngine(id,{initProgressCallback:prog});BR.id=id;BR.ready=true;break}catch(e){BR.err=String(e&&e.message||e).slice(0,140);BR.eng=null}}
 if(BR.ready){BR.err="";$("#st").textContent=det?"TARGETING ONLINE":"ONLINE";cap("Brain online.");vib([30,40,30]);return true}
-return false}
-catch(e){BR.err=String(e&&e.message||e).slice(0,140);return false}
+return cpuBrain()}
+catch(e){BR.err=String(e&&e.message||e).slice(0,140);return cpuBrain()}
 })().finally(()=>{BR.loading=null})}
 async function swapBrain(){if(BR.loading)await BR.loading.catch(()=>{});const e=BR.eng;BR.ready=false;BR.eng=null;BR.id="";try{e&&await e.unload()}catch{}return loadBrain()}
 /* start loading after ENGAGE, but never download a big model on mobile data without asking */
 async function autoBrain(){
-if(!navigator.gpu){cap("This phone's browser has no WebGPU, so E.V. runs in basic mode.");return}
+if(!navigator.gpu||S.engine==="cpu"){const c=navigator.connection;if(c&&(c.saveData||c.type==="cellular")){BR.paused=true;say("My brain needs a one time download. You're on mobile data, so I paused it. Open Tools, Settings, then Load Brain on Wi-Fi.");return}loadBrain();return}
 try{const W=await lib(),ids=await pickIds(),c=navigator.connection,metered=!!c&&(c.saveData||c.type==="cellular");let cached=false;try{cached=!!ids.length&&await W.hasModelInCache(ids[0])}catch{}
 if(!cached&&metered){BR.paused=true;say("My brain needs a one time download of about "+BS[S.size].mb+". You're on mobile data, so I paused it. Open Tools, Settings, then Load Brain when you're on Wi-Fi.");return}}
 catch(e){BR.err="Could not load the brain library. Open the app once online.";cap(BR.err);return}
 loadBrain()}
 async function think(o){try{return await think1(o)}catch(e){const m=String(e&&e.message||e);BR.last=m;try{$("#dg").textContent="Last brain error: "+m.slice(0,160)}catch{}console.error(e);
-if(e&&e.partial)return e.partial;if(/lost|OOM|out of memory|allocat/i.test(m))throw e;
+if(e&&e.partial)return e.partial;if(/lost|OOM|out of memory|allocat/i.test(m)){if(BR.eng&&BR.eng.cpu)throw e;BR.noGpu=true;await swapBrain();if(!BR.ready)throw e;return await think1({...o,hist:[]})}
 try{BR.eng&&await BR.eng.resetChat()}catch{}
-try{return await think1({...o,hist:[]})}catch(e2){if(e2&&e2.partial)return e2.partial;await swapBrain();if(!BR.ready)throw e2;return await think1({...o,hist:[]})}}}
+try{return await think1({...o,hist:[]})}catch(e2){if(e2&&e2.partial)return e2.partial;if(BR.eng&&!BR.eng.cpu)BR.noGpu=true;await swapBrain();if(!BR.ready)throw e2;return await think1({...o,hist:[]})}}}
 async function think1({sys,q,hist=[],max=450,temp=.7,timeout=120000,onText}){
 const eng=BR.eng;if(!eng)throw new Error("brain not loaded");
+if(eng.cpu){BR.abort=false;let full="",n=0;const tmo=setTimeout(()=>{BR.abort=true},timeout);
+try{const p=await eng.cpu.formatChat([{role:"system",content:sys},...hist,{role:"user",content:q}],true);
+await eng.cpu.createCompletion(p,{nPredict:max,sampling:{temp},onNewToken:(t,pc,cur,o)=>{if(BR.abort){o.abortSignal();return}const d=cur.slice(n);n=cur.length;full=cur;try{if(onText&&onText(d,full)===false){BR.abort=true;o.abortSignal()}}catch{}}});
+return full}catch(e){if(e&&typeof e==="object")e.partial=full;throw e}finally{clearTimeout(tmo)}}
 let full="",stop=false;
 const tmo=setTimeout(()=>{stop=true;eng.interruptGenerate().catch(()=>{})},timeout);
 try{const it=await eng.chat.completions.create({messages:[{role:"system",content:sys},...hist,{role:"user",content:q}],max_tokens:max,temperature:temp,stream:true});
@@ -196,7 +208,7 @@ if(st.busy)return;
 const qa=quick(q);if(qa){st.follow=true;return say(qa)}
 if(!BR.ready){
 if(BR.loading)return say("My brain is still loading, "+BR.pct+" percent. Give me a moment.");
-if(navigator.gpu&&!BR.paused&&BR.tries<3)loadBrain();
+if(!BR.paused&&BR.tries<3)loadBrain();
 return fallback(q,vis)}
 st.busy=1;st.gen=1;$("#st").textContent="THINKING…";cap("Thinking…");vib(15);
 hush();const my=beginSpeech();let buf="",sys=SYS(),pr=q;
@@ -211,10 +223,10 @@ catch(e){if(my===sid)say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
 const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
-if(!navigator.gpu){o.textContent="Build 16. "+g+". This phone's browser can't run the on-device brain, so E.V. uses basic mode.";return}
-if(!BR.ready){o.textContent="Build 16. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
-try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 16. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
-catch(e){o.textContent="Build 16. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 17. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
+if(!BR.ready){o.textContent="Build 17. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 17. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 17. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
 $("#b-di").onclick=diag;
 $("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
@@ -330,9 +342,10 @@ $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
 $("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};$("#b-ht").onclick=()=>{stack.length&&history.back();hudTest()};
 /* ---------- settings ---------- */
-const sync=()=>{$("#s-voice").value=S.voice;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
+const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
 sync();
 $("#s-voice").onchange=e=>{S.voice=e.target.value;save();sync();pauseRec();want=S.voice==="wake"&&st.run;startRec()};
+$("#s-eng").onchange=e=>{S.engine=e.target.value;save();BR.noGpu=false;BR.paused=false;BR.tries=0;cap("Switching brain engine.");swapBrain()};
 $("#s-size").onchange=e=>{S.size=e.target.value;save();BR.paused=false;BR.tries=0;cap("Switching brain size. A download of about "+BS[S.size].mb+" starts if it is not saved on this phone yet.");swapBrain()};
 $("#s-tts").onchange=e=>{S.tts=e.target.checked;save()};$("#s-hap").onchange=e=>{S.hap=e.target.checked;save()};
 $("#s-bat").onchange=e=>{S.saver=e.target.checked;save();document.body.classList.toggle("noglow",S.saver||adapt>1)};

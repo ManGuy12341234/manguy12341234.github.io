@@ -50,3 +50,7 @@ E.V. thinks with a free open model that runs inside the phone's browser (WebLLM 
 - The model library is loaded from jsDelivr and the model files from Hugging Face, so the first run needs internet; the service worker and the browser cache keep them afterwards.
 
 Say "E.V., what is ..." for questions, or "E.V., what am I looking at" for a camera question.
+
+
+## E. CPU brain
+Settings -> Brain engine: **Auto** uses the phone GPU (WebGPU) when it works and falls back to a CPU brain (llama.cpp WASM via wllama, SmolLM2 360M, about 390 MB first download) when it does not, or after a GPU error. **CPU only** forces it. CPU is slower because GitHub Pages cannot enable multi-threading.
