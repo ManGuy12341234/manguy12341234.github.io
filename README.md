@@ -9,7 +9,9 @@ Files: `index.html`, `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.
 4. Allow Camera and Microphone when asked. Compass and battery need no prompt.
 5. After updating files, bump `V` in `sw.js` (e.g. `ev-v2`) so phones pick up the change.
 
-Voice (wake phrase "E.V."). New: "HUD test" (systems-check panel + sweep), "target" (marks what is in the reticle), "drone strike" (simulated, harmless), "help". Also: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., holo view", "E.V., intel", "E.V., tactical off", "E.V., scan", "E.V., spider sense off", "E.V., battery", "E.V., settings".
+Voice (wake phrase "E.V."). New: "HUD test" (systems-check panel + sweep), "target" (marks what is in the reticle), "drone strike" (simulated, harmless), "help". Also: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., hologram", "E.V., intel", "E.V., tactical off", "E.V., scan", "E.V., spider sense off", "E.V., battery", "E.V., settings".
+
+**Hologram mode:** tap HOLOGRAM or say "E.V., hologram" (off: "E.V., hologram off"). The picture becomes a cyan projection with scan lines and a flicker, and every detected object is lifted out as its own hologram on a spinning projector ring (red when it is locked or closing in). It is a visual effect that works in normal light.
 
 **Intel (AI):** aim the red lock reticle at something (or just point the camera) and say "E.V., intel" or tap INTEL. A scanner sweeps the target, then a holographic dossier types out on the right: name, class, three facts and a one-line verdict. E.V. reads the highlights aloud and you can ask follow-ups ("how much does it cost?").
 
