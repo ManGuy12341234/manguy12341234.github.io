@@ -68,5 +68,8 @@ Settings -> Brain engine -> **Cloud (my API key)**: paste a free key from aistud
 ## H. Wake words
 Besides E.V., E.V. also wakes on sound-alikes at the start of a phrase (easy, tv, ez, ebay, ivy...). Anything else she mishears: Settings -> Extra wake words (comma separated). The text box shows what Chrome heard.
 
+## J. Frame rate
+The AI models (objects, body, hands) take turns, one per frame, and each waits at least three times as long as it took to run, so they can never stack up in one frame. Camera pixel reads (Spider-Sense, hologram edges) run about 20 times a second instead of every frame, joint boxes are drawn in a few batches, and the camera asks for 60 fps. The FPS readout at the top shows what you get. If it is still low: turn off Body and finger tracking, turn on Battery saver, or close other apps. The first seconds after ENGAGE are slow while the brain model loads.
+
 ## I. Your name
 Settings -> My name, or say "E.V., call me Tony". Leave it empty and E.V. will not use a name.

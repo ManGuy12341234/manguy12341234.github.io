@@ -57,10 +57,10 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <label>Cloud service<select id="s-cp"><option value="gemini">Google Gemini (free key)</option><option value="groq">Groq (free key)</option><option value="openrouter">OpenRouter</option><option value="custom">Custom</option></select></label>
 <label>API key<input id="s-ck" type="password" autocomplete="off" placeholder="paste key"></label><label>Model<input id="s-cm"></label><label>Endpoint<input id="s-cu"></label>
 <label>CPU model<input id="s-gg" placeholder="owner/repo:file.gguf"></label><label>Extra wake words<input id="s-ww" placeholder="easy, tv, ..."></label>
-<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 23. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>Body and finger tracking draws a small box on every joint it can see (shoulders, elbows, wrists, hips, knees, ankles and all 21 points on each hand) with lines between them. It runs on the phone, sends nothing anywhere, and downloads about 13 MB of models the first time you turn it on. It uses extra battery and can lower the frame rate; Battery saver slows it down. Say "E.V., body tracking" or "E.V., body tracking off".</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 24. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>Body and finger tracking draws a small box on every joint it can see (shoulders, elbows, wrists, hips, knees, ankles and all 21 points on each hand) with lines between them. It runs on the phone, sends nothing anywhere, and downloads about 13 MB of models the first time you turn it on. It uses extra battery and can lower the frame rate; Battery saver slows it down. Say "E.V., body tracking" or "E.V., body tracking off".</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Hologram mode turns the picture into a cyan projection with scan lines and a flicker, and lifts every detected object into its own floating hologram on a spinning projector ring. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 23</div></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 24</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
@@ -260,14 +260,14 @@ catch(e){if(my===sid)say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
 const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
-if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 23. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
-if(!BR.ready){o.textContent="Build 23. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
-try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 23. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
-catch(e){o.textContent="Build 23. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 24. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
+if(!BR.ready){o.textContent="Build 24. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 24. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 24. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
 $("#b-di").onclick=diag;
 $("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
-async function cam(){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});
+async function cam(){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60}},audio:false});
 V.srcObject=stream;await V.play();track=stream.getVideoTracks()[0];caps=track.getCapabilities?track.getCapabilities():{};
 if(caps.focusMode&&caps.focusMode.includes("continuous"))track.applyConstraints({advanced:[{focusMode:"continuous"}]}).catch(()=>{});
 $("#tbtn").hidden=!caps.torch;OV.width=V.videoWidth;OV.height=V.videoHeight}
@@ -281,7 +281,7 @@ for(let y=1;y<179;y++)for(let x=1;x<319;x++){const i=y*320+x,gx=G[i-319]+2*G[i+1
 ex.putImageData(O,0,0)}
 function setHolo(on){st.holo=on;document.body.classList.toggle("holo",on);$("#b-ho").classList.toggle("on",on);if(!on)ex.clearRect(0,0,320,180);say("Hologram mode "+(on?"online":"off"))}
 const wlock=async()=>{try{wl=await navigator.wakeLock.request("screen")}catch{}};
-addEventListener("deviceorientationabsolute",e=>{if(e.alpha==null)return;st.heading=(360-e.alpha+(screen.orientation?.angle||0))%360;$("#hd").textContent="HDG "+String(Math.round(st.heading)).padStart(3,"0")+"°"});
+addEventListener("deviceorientationabsolute",e=>{if(e.alpha==null)return;st.heading=(360-e.alpha+(screen.orientation?.angle||0))%360;const t="HDG "+String(Math.round(st.heading)).padStart(3,"0")+"°";if(t!==lastHd){lastHd=t;$("#hd").textContent=t}});
 navigator.getBattery?.().then(b=>{bat=b;const u=()=>{$("#bat").textContent=`BAT ${Math.round(b.level*100)}%${b.charging?" ⚡":""}`;if(b.level<=.2&&!b.charging&&!warned){warned=1;vib(400);say("Suit power low.")}if(b.level>.25)warned=0};b.addEventListener("levelchange",u);b.addEventListener("chargingchange",u);u()});
 /* ---------- detector ---------- */
 async function loadDet(){if(det)return;try{const M=await import(MP+"vision_bundle.mjs"),fs=await M.FilesetResolver.forVisionTasks(MP+"wasm");
@@ -289,7 +289,7 @@ const mk=d=>M.ObjectDetector.createFromOptions(fs,{baseOptions:{modelAssetPath:M
 try{det=await mk("GPU")}catch{det=await mk("CPU")}$("#st").textContent="TARGETING ONLINE"}catch{$("#st").textContent="MOTION ONLY";cap("Target AI not cached yet. Open once online. Motion sensing still active.")}}
 /* ---------- body and finger tracking: a small box on every joint (MediaPipe pose + hand landmarkers, on the phone) ---------- */
 const PM="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",HM="https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
-const PC=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[27,29],[29,31],[27,31],[28,30],[30,32],[28,32]],PJ=[0,7,8,11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32],HC=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]],TIPS=[4,8,12,16,20];
+const PC=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[27,29],[29,31],[27,31],[28,30],[30,32],[28,32]],PJ=[0,7,8,11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32],HC=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]],TIPS=[4,8,12,16,20],H21=[...Array(21).keys()];
 let pd,hd,jl=0,lastJ=0;st.pose=[];st.hands=[];
 const sm=(o,n)=>n.map((p,i)=>{const q=o&&o[i]&&o[i].length===p.length?o[i]:null;return p.map((a,k)=>({x:q?q[k].x*.4+a.x*.6:a.x,y:q?q[k].y*.4+a.y*.6:a.y,v:a.visibility}))});
 async function loadJoints(){if(jl)return;jl=1;cap("Loading body and finger tracking…");let p,h;
@@ -302,28 +302,34 @@ catch(e){try{p&&p.close()}catch{}jl=0;pd=hd=null;S.joints=false;save();$("#s-jt"
 function unJoints(){const p=pd,h=hd;pd=hd=null;jl=0;st.pose=[];st.hands=[];try{p&&p.close()}catch{}try{h&&h.close()}catch{}}
 function setJoints(on){S.joints=on;save();$("#s-jt").checked=on;if(on)loadJoints();else unJoints();say("Body and finger tracking "+(on?"online":"off"))}
 function joints(){if(!S.joints||!(st.pose.length||st.hands.length))return;
-const W=OV.width,H=OV.height,s=Math.max(9,W/80),gl=document.body.classList.contains("noglow")?0:8;
-ox.save();ox.lineWidth=Math.max(1.5,W/600);ox.shadowBlur=gl;ox.shadowColor="#3df2ff";
-const box=(p,k)=>{const z=k*s;ox.strokeRect(p.x*W-z/2,p.y*H-z/2,z,z)};
-for(const P of st.pose){const ok=i=>P[i]&&(P[i].v==null||P[i].v>.4);ox.strokeStyle="#3df2ff";ox.beginPath();
-for(const[a,b]of PC)if(ok(a)&&ok(b)){ox.moveTo(P[a].x*W,P[a].y*H);ox.lineTo(P[b].x*W,P[b].y*H)}
-if(ok(0)&&ok(11)&&ok(12)){ox.moveTo(P[0].x*W,P[0].y*H);ox.lineTo((P[11].x+P[12].x)/2*W,(P[11].y+P[12].y)/2*H)}
+const W=OV.width,H=OV.height,s=Math.max(9,W/80);
+ox.save();ox.lineWidth=Math.max(1.5,W/600);ox.shadowBlur=document.body.classList.contains("noglow")?0:6;ox.shadowColor="#3df2ff";
+/* each group is drawn as a single path, so the glow is computed a few times per frame instead of once per joint */
+const grp=(L,col,CN,JS,sz,ex)=>{if(!L.length)return;const ok=(P,i)=>P[i]&&(P[i].v==null||P[i].v>.4);ox.strokeStyle=ox.fillStyle=col;
+ox.beginPath();for(const P of L){for(const[a,b]of CN)if(ok(P,a)&&ok(P,b)){ox.moveTo(P[a].x*W,P[a].y*H);ox.lineTo(P[b].x*W,P[b].y*H)}if(ex)ex(P,ok)}
 ox.globalAlpha=.55;ox.stroke();ox.globalAlpha=1;
-for(const i of PJ)if(ok(i))box(P[i],i===0?1.5:1)}
-for(const P of st.hands){ox.strokeStyle="#ffffff";ox.fillStyle="#3df2ff";ox.beginPath();
-for(const[a,b]of HC){ox.moveTo(P[a].x*W,P[a].y*H);ox.lineTo(P[b].x*W,P[b].y*H)}
-ox.globalAlpha=.55;ox.stroke();ox.globalAlpha=1;
-P.forEach((p,i)=>{if(TIPS.includes(i)){const z=s*.75;ox.fillRect(p.x*W-z/2,p.y*H-z/2,z,z)}else box(p,.6)})}
+ox.beginPath();for(const P of L)for(const i of JS)if(ok(P,i)){const z=sz(i)*s;ox.rect(P[i].x*W-z/2,P[i].y*H-z/2,z,z)}ox.stroke();
+if(L===st.hands){ox.beginPath();for(const P of L)for(const i of TIPS){const z=s*.75;ox.rect(P[i].x*W-z/2,P[i].y*H-z/2,z,z)}ox.fill()}};
+grp(st.pose,"#3df2ff",PC,PJ,i=>i===0?1.5:1,(P,ok)=>{if(ok(P,0)&&ok(P,11)&&ok(P,12)){ox.moveTo(P[0].x*W,P[0].y*H);ox.lineTo((P[11].x+P[12].x)/2*W,(P[11].y+P[12].y)/2*H)}});
+grp(st.hands,"#ffffff",HC,H21,i=>TIPS.includes(i)?.75:.6);
 ox.restore()}
 /* ---------- render loop ---------- */
 const sc=document.createElement("canvas");sc.width=160;sc.height=90;const sx=sc.getContext("2d",{willReadFrequently:true}),ox=OV.getContext("2d"),rx=RD.getContext("2d");
+/* AI jobs (objects, pose, hands) share one slot per frame, so two models never land in the same frame.
+   Each job waits at least 3x as long as it took to run, so the models can use at most about a quarter of the main thread. */
+let lastA=0,lastH=0,lastR=0,lastHd="";
+const JOBS=[
+{due:0,mul:3,on:()=>det,gap:()=>S.saver?300:infMs,run:ts=>{const nb=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}));trk(nb,ts);st.boxes=nb}},
+{due:0,mul:3,on:()=>S.joints&&pd&&hd,gap:()=>S.saver?250:90,run:ts=>{st.pose=sm(st.pose,pd.detectForVideo(V,ts).landmarks)}},
+{due:0,mul:3,on:()=>S.joints&&pd&&hd,gap:()=>S.saver?250:90,run:ts=>{st.hands=sm(st.hands,hd.detectForVideo(V,ts).landmarks)}}];
+function infer(ts){if(st.gen)return;let b,bo=-1;for(const j of JOBS){if(!j.on())continue;const o=ts-j.due;if(o>=0&&o>bo){bo=o;b=j}}if(!b)return;
+const t=performance.now();try{b.run(ts)}catch{}b.due=ts+Math.max(b.gap(),(performance.now()-t)*b.mul)}
 function tick(ts){if(!st.run)return;st.raf=requestAnimationFrame(tick);frames++;
 if(ts-t0>=1000){const f=frames*1000/(ts-t0);$("#fps").textContent=Math.round(f)+" FPS"+(adapt?` · ADAPT ${adapt}`:"");low=f<24?low+1:0;frames=0;t0=ts;if(low>=3){low=0;degrade()}}
 if(V.readyState<2)return;
-if(!(S.saver&&(skip^=1))){analyse(ts)}if(st.holo&&frames%(S.saver?3:2)===0)holo();
-if(ts-lastInf>(S.saver?300:infMs)&&det&&!st.gen){lastInf=ts;try{const nb=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}));trk(nb,ts);st.boxes=nb}catch{}}
-if(S.joints&&pd&&hd&&!st.gen&&ts-lastJ>(S.saver?250:Math.max(90,infMs))){lastJ=ts;try{st.pose=sm(st.pose,pd.detectForVideo(V,ts).landmarks)}catch{}try{st.hands=sm(st.hands,hd.detectForVideo(V,ts).landmarks)}catch{}}
-draw(ts);radar(ts)}
+if(ts-lastA>(S.saver?100:50)){lastA=ts;analyse(ts)}if(st.holo&&ts-lastH>(S.saver?120:66)){lastH=ts;holo()}
+infer(ts);
+draw(ts);if(ts-lastR>33){lastR=ts;radar(ts)}}
 function degrade(){adapt++;if(adapt===1)infMs=250;else if(adapt===2)document.body.classList.add("noglow");else infMs=500}
 function analyse(ts){sx.drawImage(V,0,0,160,90);const d=sx.getImageData(0,0,160,90).data,n=160*90,L=new Uint8Array(n);let mv=0;
 for(let i=0,p=0;i<n;i++,p+=4){const y=(d[p]*77+d[p+1]*150+d[p+2]*29)>>8;L[i]=y;if(prev&&Math.abs(y-prev[i])>28)mv++}
@@ -340,8 +346,7 @@ const key=best&&bd<OV.width*.18?best.l:"";st.tgt=key?best:null;$("#ret").classLi
 function holoBox(b,ts,hot){const col=hot?"255,61,90":"61,242,255",t=ts/1000,fl=Math.sin(t*37+b.x)>.93?.5:1,j=Math.sin(t*23+b.y)>.97?(Math.random()-.5)*OV.width/60:0,x=b.x+j,cx=x+b.w/2,by=b.y+b.h,ry=Math.max(5,b.w*.08);
 ox.save();ox.globalAlpha=fl;
 ox.save();ox.beginPath();ox.rect(x,b.y,b.w,b.h);ox.clip();
-try{ox.filter="grayscale(1) contrast(1.4) brightness(1.3)"}catch{}
-ox.globalAlpha=fl*.88;ox.drawImage(V,b.x,b.y,b.w,b.h,x,b.y,b.w,b.h);ox.filter="none";
+ox.globalAlpha=fl*.88;ox.drawImage(V,b.x,b.y,b.w,b.h,x,b.y,b.w,b.h);
 ox.globalCompositeOperation="source-atop";ox.fillStyle="rgba("+col+",.6)";ox.fillRect(x,b.y,b.w,b.h);
 ox.globalCompositeOperation="source-over";ox.globalAlpha=fl;ox.fillStyle="rgba(2,6,10,.4)";for(let y=b.y+(t*30)%4;y<by;y+=4)ox.fillRect(x,y,b.w,1.5);
 const sy=b.y+b.h*((t*.8+b.x/400)%1);ox.fillStyle="rgba("+col+",.85)";ox.fillRect(x,sy,b.w,Math.max(2,b.h/60));
