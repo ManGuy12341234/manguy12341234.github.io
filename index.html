@@ -35,7 +35,6 @@ button.on{background:var(--c);color:#000}
 #boot h1{margin:0;font-size:22px;letter-spacing:.4em;font-weight:400}
 body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-rotate(60deg)}100%{filter:none}}
 .noglow *{text-shadow:none!important;box-shadow:none!important}
-#ed{display:none;mix-blend-mode:screen}body.holo #ed{display:block}body.holo #v{filter:grayscale(1) brightness(.34) contrast(1.25) sepia(1) hue-rotate(150deg) saturate(2.2);animation:hf 4.5s steps(1) infinite}@keyframes hf{0%,100%{opacity:1}30%{opacity:.88}31%{opacity:1}72%{opacity:.8}73%{opacity:.95}74%{opacity:1}}body.holo #hud::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(2,6,10,.34) 0 1px,transparent 1px 4px);animation:sl 6s linear infinite}@keyframes sl{to{background-position:0 40px}}body.holo #ed{animation:hf 3.1s steps(1) infinite}body.holo #stage::after{content:"";position:absolute;left:0;right:0;top:-20%;height:20%;background:linear-gradient(transparent,rgba(61,242,255,.28),transparent);pointer-events:none;animation:hs 3s linear infinite}@keyframes hs{to{top:100%}}
 #pulse{position:absolute;left:50%;top:50%;width:10vmin;height:10vmin;margin:-5vmin 0 0 -5vmin;border:2px solid var(--c);border-radius:50%;opacity:0;pointer-events:none}#pulse.go{animation:pl 1.3s ease-out}@keyframes pl{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(9)}}
 #sweep{position:absolute;left:0;right:0;top:0;height:3px;background:var(--c);box-shadow:0 0 16px 4px var(--c);opacity:0;pointer-events:none}#sweep.go{animation:sw 2.4s ease-in-out}@keyframes sw{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
 #hud.test #top,#hud.test #ret,#hud.test #rad{animation:tf .5s steps(2) 4}@keyframes tf{50%{opacity:.2}}
@@ -45,11 +44,11 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 .pane{padding-right:calc(env(safe-area-inset-right,0px) + 14px)}input{user-select:text;-webkit-user-select:text}
 [hidden]{display:none!important}
 </style></head><body>
-<div id="stage"><video id="v" playsinline muted></video><canvas id="ed" width="320" height="180"></canvas><canvas id="ov"></canvas></div>
+<div id="stage"><video id="v" playsinline muted></video><canvas id="ov"></canvas></div>
 <div id="hud"><div id="top"><span id="bat">BAT --</span><span id="hd">HDG ---°</span><span id="fps">-- FPS</span><span id="st">STANDBY</span></div>
 <div id="ret"></div><canvas id="rad" width="300" height="300"></canvas><div id="cap">E.V. standing by.</div><div id="ss"></div><div id="pulse"></div><div id="sweep"></div><div id="intel"><div id="it"></div><div id="ib"></div></div>
 <button id="ptt" hidden>HOLD</button><button id="menu">☰ TOOLS</button></div>
-<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ht">HUD TEST</button><button id="b-ho">HOLOGRAM</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-in">INTEL · AI</button><button id="b-tc" class="on">TACTICAL DATA</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
+<div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ht">HUD TEST</button><button id="b-pr" class="on">PROBABILITY</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-in">INTEL · AI</button><button id="b-tc" class="on">TACTICAL DATA</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
 <label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label><label>Body and finger tracking<input type="checkbox" id="s-jt"></label>
@@ -57,10 +56,10 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <label>Cloud service<select id="s-cp"><option value="gemini">Google Gemini (free key)</option><option value="groq">Groq (free key)</option><option value="openrouter">OpenRouter</option><option value="custom">Custom</option></select></label>
 <label>API key<input id="s-ck" type="password" autocomplete="off" placeholder="paste key"></label><label>Model<input id="s-cm"></label><label>Endpoint<input id="s-cu"></label>
 <label>CPU model<input id="s-gg" placeholder="owner/repo:file.gguf"></label><label>Extra wake words<input id="s-ww" placeholder="easy, tv, ..."></label>
-<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 24. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>Body and finger tracking draws a small box on every joint it can see (shoulders, elbows, wrists, hips, knees, ankles and all 21 points on each hand) with lines between them. It runs on the phone, sends nothing anywhere, and downloads about 13 MB of models the first time you turn it on. It uses extra battery and can lower the frame rate; Battery saver slows it down. Say "E.V., body tracking" or "E.V., body tracking off".</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 25. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>Body and finger tracking draws a small box on every joint it can see (shoulders, elbows, wrists, hips, knees, ankles and all 21 points on each hand) with lines between them. It runs on the phone, sends nothing anywhere, and downloads about 13 MB of models the first time you turn it on. It uses extra battery and can lower the frame rate; Battery saver slows it down. Say "E.V., body tracking" or "E.V., body tracking off".</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
-<small>Hologram mode turns the picture into a cyan projection with scan lines and a flicker, and lifts every detected object into its own floating hologram on a spinning projector ring. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 24</div></div>
+<small>Probability mode writes an instant estimate under every target: how sure the detector is (ID) and, for anything closing in on you, a rough contact chance and arrival time. These are estimates from the camera, not measurements. You can also ask E.V. probability questions by voice, like coin flips, dice, cards, odds and "3 out of 10". They are worked out on the phone in a blink, without the AI brain. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 25</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
@@ -68,7 +67,7 @@ const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 delete S.key;delete S.model;
 const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
-const st={tac:true,tgt:null,anl:null,run:false,booted:false,holo:false,sense:true,speaking:false,awake:0,follow:false,busy:0,gen:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
+const st={tac:true,tgt:null,anl:null,run:false,booted:false,prob:true,sense:true,speaking:false,awake:0,follow:false,busy:0,gen:0,hist:[],heading:null,I:0,boxes:[],lock:"",raf:0};
 let stream,track,caps={},det,wl,deferred,bat,warned=0,infMs=100,adapt=0,low=0,frames=0,t0=performance.now(),lastInf=0,lastAlert=0,prev,skip=0;
 const MODEL="https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",MP="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/";
 const nm=()=>S.name?", "+S.name:"";
@@ -112,11 +111,11 @@ const pickAlt=r=>{for(let k=0;k<r.length;k++)if(wk(r[k].transcript.toLowerCase()
 function hear(t){t=t.toLowerCase().trim();cap("“"+t+"”");let c;const w=S.voice==="hold"?null:wk(t);
 if(S.voice==="hold")c=t;else if(w!==null){c=w;st.awake=Date.now()+10000;if(!c)return say("Yes"+nm()+"?")}else if(Date.now()<st.awake)c=t;else return;cmd(c)}
 const VIS=/\b(this|these|those|here|see|seeing|look|looking|looks|read (this|that|it)|identify|describe|camera|holding|in front of me|around me|what'?s that|what is that|what are those)\b/;
-function cmd(c){c=c.toLowerCase().replace(/[,.?!]/g,"").trim();if(!c)return;
+function cmd(c){c=c.toLowerCase().replace(/(\d)\.(?=\d)/g,"$1\u0001").replace(/(\d),(?=\d{3}\b)/g,"$1").replace(/[,.?!]/g,"").replace(/\u0001/g,".").trim();if(!c)return;
 const k=c.replace(/\b(please|the|my|turn|switch|set|to)\b/g,"").replace(/\btwo\b/,"2").replace(/\bfour\b/,"4").replace(/\bone\b/,"1").replace(/\s+/g," ").trim();let m;
 if(/^(flash ?light|torch)( on| off)?$|^(on|off) (flash ?light|torch)$/.test(k))return torch(!/off/.test(k));
 if(m=k.match(/^zoom (\d) ?x?$/))return zoom(+m[1]);if(/^zoom (out|reset)$/.test(k))return zoom(1);
-if(/^(holo|hologram|holograms|holographic|wireframe)( view| vision| mode)?( on| off)?$|^(on|off) (holo|hologram|holographic|wireframe)( view| mode)?$/.test(k))return setHolo(!/off/.test(k));
+if(/^probabilit(y|ies)( mode| data| display| readout)?( on| off)?$|^(on|off) probabilit(y|ies)( mode| data)?$/.test(k))return setProb(!/off/.test(k));
 if(/^(body|joint|joints|finger|fingers|hand|hands|skeleton)( and (finger|hand)s?)?( tracking| scan| scanning| mode| view)?( on| off)?$|^(on|off) (body|finger|joint|skeleton)( tracking| scan)?$/.test(k))return setJoints(!/off/.test(k));
 if(/^spider.?sense( on| off)?$|^(on|off) spider.?sense$/.test(k)){st.sense=!/off/.test(k);$("#b-ss").classList.toggle("on",st.sense);return say("Spider-Sense "+(st.sense?"active":"disabled"))}
 if(/^(intel|dossier|target intel|analy[sz]e( target| that| this| it| object)?|deep scan|scan target|identify target)$/.test(k))return intel();
@@ -211,12 +210,49 @@ catch(e){if(e&&typeof e==="object")e.partial=full;throw e}
 finally{clearTimeout(tmo)}
 return full}
 const brainErr=e=>{const m=String(e&&e.message||e);if(/^Cloud (401|403)/.test(m))return "The cloud service rejected your API key. Check it in Settings.";if(/^Cloud 429/.test(m))return "The cloud service is rate limited. Try again in a moment.";if(/^Cloud 4/.test(m))return "The cloud service refused the request: "+m.slice(0,90);if(BR.eng&&BR.eng.cloud&&/fetch|network/i.test(m))return "I can't reach the cloud brain. Check your internet.";if(/lost|memory|OOM|allocat|device/i.test(m)){BR.ready=false;BR.eng=null;BR.err="GPU memory or device lost";return "My on-device brain ran out of memory. Try the Fast brain in Settings."}return "My brain hit an error. Try asking again."};
+/* instant probability calculator: plain math on the phone, no model, so answers are immediate */
+const NW={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,hundred:100,once:1,twice:2,thrice:3,double:2,triple:3};
+const nv=w=>/^\d+(\.\d+)?$/.test(w)?+w:NW[w],nums=t=>t.split(/[^a-z0-9.]+/).map(nv).filter(x=>x!==undefined&&!isNaN(x));
+const LF=[0,0],lf=n=>{while(LF.length<=n)LF.push(LF[LF.length-1]+Math.log(LF.length));return LF[n]};
+const bin=(n,k,p)=>k<0||k>n?0:p<=0?+(k===0):p>=1?+(k===n):Math.exp(lf(n)-lf(k)-lf(n-k)+k*Math.log(p)+(n-k)*Math.log(1-p));
+const pct=p=>{const x=p*100;return p>=.99995?"100":x>=10?String(+x.toFixed(1)):x>=1?String(+x.toFixed(2)):x>0?String(+x.toPrecision(2)):"0"};
+const fmtP=p=>"That is "+pct(p)+" percent"+(p>0&&p<.5?", about 1 in "+Math.round(1/p).toLocaleString("en-US"):"")+".";
+const cmpM=t=>/\b(at least|or more|or higher|or greater|or better)\b/.test(t)?"ge":/\b(at most|no more than|or less|or fewer|or lower|up to)\b/.test(t)?"le":/\b(more than|greater than|higher than|over|above|exceed\w*)\b/.test(t)?"gt":/\b(less than|fewer than|lower than|under|below)\b/.test(t)?"lt":"eq";
+const cmpP=(d,T,m)=>{let p=0;d.forEach((q,v)=>{if(m==="ge"?v>=T:m==="le"?v<=T:m==="gt"?v>T:m==="lt"?v<T:v===T)p+=q});return p};
+const diceD=(n,sd)=>{let d=[1];for(let i=0;i<n;i++){const e=new Array(d.length+sd).fill(0);d.forEach((q,v)=>{if(q)for(let f=1;f<=sd;f++)e[v+f]+=q/sd});d=e}return d};
+const bigN=L=>L<12?Math.round(Math.pow(10,L)).toLocaleString("en-US"):"about "+Math.pow(10,L-Math.floor(L)).toFixed(2)+" times ten to the "+Math.floor(L);
+function comb(s){let m;if(m=s.match(/\b(\d+) choose (\d+)\b/)){const n=+m[1],k=+m[2];if(k>n||n>1000)return null;return n+" choose "+k+" is "+bigN((lf(n)-lf(k)-lf(n-k))/Math.LN10)+"."}
+if(m=s.match(/\b(\d+) factorial\b|\bfactorial of (\d+)\b/)){const n=+(m[1]||m[2]);if(n>170)return null;return n+" factorial is "+bigN(lf(n)/Math.LN10)+"."}return null}
+function probQ(s){if(!/\b(probabilit\w*|odds|chances?|likel\w*)\b/.test(s))return null;
+try{const t=" "+s.replace(/%/g," percent ").replace(/\s+/g," ")+" ",M=cmpM(t);let x;
+if(/\b(coin|coins|flip|flips|flipping|flipped|toss|tosses|tossing|heads|tails)\b/.test(t)){const N=nums(t);
+if(/\b(in a row|consecutive|straight|back to back)\b/.test(t)){const n=N[0]||2;return n>0&&n<=1000?fmtP(Math.pow(.5,n)):null}
+if(N.length>=2&&Number.isInteger(N[0])&&Number.isInteger(N[1])&&N[0]<=N[1]&&N[1]<=1000){const n=N[1],d=Array.from({length:n+1},(_,i)=>bin(n,i,.5));return fmtP(cmpP(d,N[0],M))}
+return N.length?null:fmtP(.5)}
+if(/\b(dice|die|roll|rolls|rolling|rolled)\b|\bd\d+\b/.test(t)){let sd=6,n=1,u=t;
+if(x=u.match(/\bd(\d+)\b/)){sd=+x[1];u=u.replace(x[0]," ")}else if(x=u.match(/\b(\d+|[a-z]+)[ -]sided\b/)){const v=nv(x[1]);if(v){sd=v;u=u.replace(x[0]," ")}}
+if(x=u.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten) (?:(?:fair|standard|regular|normal) )?(?:dice|die)\b/)){n=nv(x[1]);u=u.replace(x[0]," ")}
+if(!(sd>=2&&sd<=1000&&n>=1&&n<=30))return null;const d=diceD(n,sd);
+if(/\bsnake eyes\b/.test(u))return fmtP(1/36);
+if(n===2&&/\b(doubles?|same number|matching)\b/.test(u))return fmtP(1/sd);
+if(/\b(even|odd)\b/.test(u)&&!/\beven (chance|odds)\b/.test(u)){const ev=/\beven\b/.test(u);let q=0;d.forEach((v,i)=>{if((i%2===0)===ev)q+=v});return fmtP(q)}
+const T=nums(u)[0];return T===undefined?null:fmtP(cmpP(d,T,M))}
+if(/\b(card|cards|deck|draw|drawing|drawn|dealt|deal|shuffled)\b/.test(t)){const rk=/\b(ace|king|queen|jack)s?\b/.test(t),su=/\b(spade|heart|club|diamond)s?\b/.test(t),fc=/\bface cards?\b/.test(t),co=/\b(red|black)\b/.test(t);
+const k=rk&&su?1:rk?4:su?13:fc?12:co?26:null;if(k==null)return null;
+const n=Math.min(52,/\b(in a row|consecutive|twice|both|back to back|straight)\b/.test(t)?(nums(t)[0]||2):1);let q=1;for(let i=0;i<n;i++)q*=Math.max(0,k-i)/(52-i);return fmtP(q)}
+const pc=[...t.matchAll(/(\d+(?:\.\d+)?) percent/g)].map(a=>+a[1]/100);
+if(pc.length===1&&/\bin a row\b/.test(t)){const n=nums(t.replace(/(\d+(?:\.\d+)?) percent/," "))[0];return n>0&&n<=1000?fmtP(Math.pow(pc[0],n)):null}
+if(pc.length===1&&/\bat least one\b/.test(t)){const n=nums(t.replace("at least one"," ").replace(/(\d+(?:\.\d+)?) percent/," "))[0];return n>0&&n<=100000?fmtP(1-Math.pow(1-pc[0],n)):null}
+if(pc.length===2)return fmtP(/\bor\b/.test(t)?pc[0]+pc[1]-pc[0]*pc[1]:pc[0]*pc[1]);
+if(x=t.match(/(\d+(?:\.\d+)?) (?:out of|in) (\d+(?:\.\d+)?)/)){const a=+x[1],b=+x[2];if(b>0&&a<=b)return fmtP(a/b)}
+return null}catch{return null}}
 /* instant answers that never need the model (a small model is bad at math and clocks) */
 function quick(q){const s=q.toLowerCase().replace(/[?!]/g,"").replace(/\s+/g," ").trim(),n=new Date();
 if(/^(hi|hello|hey)$/.test(s))return "Hello"+nm()+".";
 if(/^(who|what) are you$|^what'?s your name$/.test(s))return "I'm E.V., the tactical intelligence system in your suit interface.";
-if(/^(help|commands|what can you do)$/.test(s))return "Try HUD test, scan, intel, target, tactical, hologram, flashlight, zoom, or battery.";
+if(/^(help|commands|what can you do)$/.test(s))return "Try HUD test, scan, intel, target, tactical, probability, flashlight, zoom, or battery.";
 if(/^how are you/.test(s))return "All systems nominal.";
+const pq=probQ(s)||comb(s);if(pq)return pq;
 if(/^(what('?s| is)( the)? (time|date|day)|what time|what day|what'?s today|today'?s date)/.test(s)){
 if(/date|day|today/.test(s))return "Today is "+n.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric",year:"numeric"})+".";
 return "It is "+n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+"."}
@@ -260,10 +296,10 @@ catch(e){if(my===sid)say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
 const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
-if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 24. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
-if(!BR.ready){o.textContent="Build 24. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
-try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 24. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
-catch(e){o.textContent="Build 24. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 25. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
+if(!BR.ready){o.textContent="Build 25. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 25. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 25. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
 $("#b-di").onclick=diag;
 $("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
@@ -274,12 +310,6 @@ $("#tbtn").hidden=!caps.torch;OV.width=V.videoWidth;OV.height=V.videoHeight}
 async function torch(on){if(!caps.torch)return say("Torch unavailable on this camera.");try{await track.applyConstraints({advanced:[{torch:on}]});$("#tbtn").classList.toggle("on",on);say("Flashlight "+(on?"on":"off"))}catch{vib(400);say("Torch failed.")}}
 async function zoom(z){if(caps.zoom){const k=Math.min(Math.max(z,caps.zoom.min),caps.zoom.max);try{await track.applyConstraints({advanced:[{zoom:k}]});$("#stage").style.transform="";return say(`Zoom ${k}x, optical.`)}catch{}}
 $("#stage").style.transform=`scale(${z})`;say(`Zoom ${z}x, digital.`)}
-const hc=document.createElement("canvas");hc.width=320;hc.height=180;const hx=hc.getContext("2d",{willReadFrequently:true}),ED=$("#ed"),ex=ED.getContext("2d"),G=new Uint8Array(57600),O=ex.createImageData(320,180);
-function holo(){hx.drawImage(V,0,0,320,180);const p=hx.getImageData(0,0,320,180).data,q=O.data;q.fill(0);
-for(let i=0,j=0;i<57600;i++,j+=4)G[i]=(p[j]*77+p[j+1]*150+p[j+2]*29)>>8;
-for(let y=1;y<179;y++)for(let x=1;x<319;x++){const i=y*320+x,gx=G[i-319]+2*G[i+1]+G[i+321]-G[i-321]-2*G[i-1]-G[i+319],gy=G[i+319]+2*G[i+320]+G[i+321]-G[i-321]-2*G[i-320]-G[i-319],m=Math.abs(gx)+Math.abs(gy);if(m>60){const j=i*4;q[j]=61;q[j+1]=242;q[j+2]=255;q[j+3]=Math.min(255,(m-60)*2.2)}}
-ex.putImageData(O,0,0)}
-function setHolo(on){st.holo=on;document.body.classList.toggle("holo",on);$("#b-ho").classList.toggle("on",on);if(!on)ex.clearRect(0,0,320,180);say("Hologram mode "+(on?"online":"off"))}
 const wlock=async()=>{try{wl=await navigator.wakeLock.request("screen")}catch{}};
 addEventListener("deviceorientationabsolute",e=>{if(e.alpha==null)return;st.heading=(360-e.alpha+(screen.orientation?.angle||0))%360;const t="HDG "+String(Math.round(st.heading)).padStart(3,"0")+"°";if(t!==lastHd){lastHd=t;$("#hd").textContent=t}});
 navigator.getBattery?.().then(b=>{bat=b;const u=()=>{$("#bat").textContent=`BAT ${Math.round(b.level*100)}%${b.charging?" ⚡":""}`;if(b.level<=.2&&!b.charging&&!warned){warned=1;vib(400);say("Suit power low.")}if(b.level>.25)warned=0};b.addEventListener("levelchange",u);b.addEventListener("chargingchange",u);u()});
@@ -319,7 +349,7 @@ const sc=document.createElement("canvas");sc.width=160;sc.height=90;const sx=sc.
    Each job waits at least 3x as long as it took to run, so the models can use at most about a quarter of the main thread. */
 let lastA=0,lastH=0,lastR=0,lastHd="";
 const JOBS=[
-{due:0,mul:3,on:()=>det,gap:()=>S.saver?300:infMs,run:ts=>{const nb=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}));trk(nb,ts);st.boxes=nb}},
+{due:0,mul:3,on:()=>det,gap:()=>S.saver?300:infMs,run:ts=>{const nb=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,s:d.categories[0].score,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}));trk(nb,ts);st.boxes=nb}},
 {due:0,mul:3,on:()=>S.joints&&pd&&hd,gap:()=>S.saver?250:90,run:ts=>{st.pose=sm(st.pose,pd.detectForVideo(V,ts).landmarks)}},
 {due:0,mul:3,on:()=>S.joints&&pd&&hd,gap:()=>S.saver?250:90,run:ts=>{st.hands=sm(st.hands,hd.detectForVideo(V,ts).landmarks)}}];
 function infer(ts){if(st.gen)return;let b,bo=-1;for(const j of JOBS){if(!j.on())continue;const o=ts-j.due;if(o>=0&&o>bo){bo=o;b=j}}if(!b)return;
@@ -327,7 +357,7 @@ const t=performance.now();try{b.run(ts)}catch{}b.due=ts+Math.max(b.gap(),(perfor
 function tick(ts){if(!st.run)return;st.raf=requestAnimationFrame(tick);frames++;
 if(ts-t0>=1000){const f=frames*1000/(ts-t0);$("#fps").textContent=Math.round(f)+" FPS"+(adapt?` · ADAPT ${adapt}`:"");low=f<24?low+1:0;frames=0;t0=ts;if(low>=3){low=0;degrade()}}
 if(V.readyState<2)return;
-if(ts-lastA>(S.saver?100:50)){lastA=ts;analyse(ts)}if(st.holo&&ts-lastH>(S.saver?120:66)){lastH=ts;holo()}
+if(ts-lastA>(S.saver?100:50)){lastA=ts;analyse(ts)}
 infer(ts);
 draw(ts);if(ts-lastR>33){lastR=ts;radar(ts)}}
 function degrade(){adapt++;if(adapt===1)infMs=250;else if(adapt===2)document.body.classList.add("noglow");else infMs=500}
@@ -340,24 +370,8 @@ if(st.I>.2){const k=Math.ceil(st.I*3),on=90+Math.round(st.I*150),p=[],dur=k*(on+
 function draw(ts){ox.clearRect(0,0,OV.width,OV.height);anlDraw();joints();const cx=OV.width/2,cy=OV.height/2;let best,bd=1e9;
 ox.lineWidth=Math.max(2,OV.width/400);ox.font=`${Math.round(OV.width/55)}px monospace`;
 for(const b of st.boxes){const dx=b.x+b.w/2-cx,dy=b.y+b.h/2-cy,dd=Math.hypot(dx,dy);if(dd<bd){bd=dd;best=b}}
-for(const b of st.boxes){const L=b===best&&bd<OV.width*.18,cl=st.tac&&b.v>.8;ox.strokeStyle=ox.fillStyle=(L||cl)?"#ff3d5a":"#3df2ff";if(st.holo)holoBox(b,ts,L||cl);else ox.strokeRect(b.x,b.y,b.w,b.h);ox.fillText((L?"LOCK ":"")+b.l.toUpperCase(),b.x+4,b.y-6);if(st.tac&&b.rs)ox.fillText(info(b),b.x+4,Math.min(OV.height-6,b.y+b.h+Math.round(OV.width/55)+2))}
+for(const b of st.boxes){const L=b===best&&bd<OV.width*.18,cl=st.tac&&b.v>.8;ox.strokeStyle=ox.fillStyle=(L||cl)?"#ff3d5a":"#3df2ff";ox.strokeRect(b.x,b.y,b.w,b.h);ox.fillText((L?"LOCK ":"")+b.l.toUpperCase(),b.x+4,b.y-6);if(st.tac&&b.rs)ox.fillText(info(b),b.x+4,Math.min(OV.height-6,b.y+b.h+Math.round(OV.width/55)+2));if(st.prob&&b.s)ox.fillText(plin(b),b.x+4,Math.min(OV.height-6,b.y+b.h+(Math.round(OV.width/55)+2)*(st.tac&&b.rs?2:1)))}
 const key=best&&bd<OV.width*.18?best.l:"";st.tgt=key?best:null;$("#ret").classList.toggle("lock",!!key);if(key!==st.lock){st.lock=key;if(key){vib([40,60,40]);cap("Target locked: "+key)}}}
-/* hologram mode: each detected object is lifted off the picture, tinted, scan-lined and set on a spinning projector ring */
-function holoBox(b,ts,hot){const col=hot?"255,61,90":"61,242,255",t=ts/1000,fl=Math.sin(t*37+b.x)>.93?.5:1,j=Math.sin(t*23+b.y)>.97?(Math.random()-.5)*OV.width/60:0,x=b.x+j,cx=x+b.w/2,by=b.y+b.h,ry=Math.max(5,b.w*.08);
-ox.save();ox.globalAlpha=fl;
-ox.save();ox.beginPath();ox.rect(x,b.y,b.w,b.h);ox.clip();
-ox.globalAlpha=fl*.88;ox.drawImage(V,b.x,b.y,b.w,b.h,x,b.y,b.w,b.h);
-ox.globalCompositeOperation="source-atop";ox.fillStyle="rgba("+col+",.6)";ox.fillRect(x,b.y,b.w,b.h);
-ox.globalCompositeOperation="source-over";ox.globalAlpha=fl;ox.fillStyle="rgba(2,6,10,.4)";for(let y=b.y+(t*30)%4;y<by;y+=4)ox.fillRect(x,y,b.w,1.5);
-const sy=b.y+b.h*((t*.8+b.x/400)%1);ox.fillStyle="rgba("+col+",.85)";ox.fillRect(x,sy,b.w,Math.max(2,b.h/60));
-ox.restore();
-const g=ox.createLinearGradient(0,by,0,b.y);g.addColorStop(0,"rgba("+col+",.4)");g.addColorStop(1,"rgba("+col+",0)");
-ox.fillStyle=g;ox.beginPath();ox.moveTo(cx-b.w*.5,by);ox.lineTo(cx+b.w*.5,by);ox.lineTo(cx+b.w*.4,b.y);ox.lineTo(cx-b.w*.4,b.y);ox.closePath();ox.fill();
-ox.strokeStyle="rgb("+col+")";ox.shadowColor="rgb("+col+")";ox.shadowBlur=12;ox.lineWidth=Math.max(2,OV.width/380);
-const k=Math.min(b.w,b.h)*.22;ox.beginPath();for(const[px,py,dx,dy]of[[x,b.y,1,1],[x+b.w,b.y,-1,1],[x,by,1,-1],[x+b.w,by,-1,-1]]){ox.moveTo(px+dx*k,py);ox.lineTo(px,py);ox.lineTo(px,py+dy*k)}ox.stroke();
-ox.beginPath();ox.ellipse(cx,by,b.w*.62,ry*1.6,0,0,7);ox.stroke();
-ox.setLineDash([ry*1.2,ry*.9]);ox.lineDashOffset=-t*ry*6;ox.beginPath();ox.ellipse(cx,by,b.w*.48,ry,0,0,7);ox.stroke();ox.setLineDash([]);
-ox.restore()}
 function radar(ts){const R=150;rx.clearRect(0,0,300,300);rx.strokeStyle=rx.fillStyle="#3df2ff";rx.lineWidth=2;rx.globalAlpha=.8;
 for(const r of[1,.66,.33]){rx.beginPath();rx.arc(R,R,r*(R-8),0,7);rx.stroke()}
 const a=ts/1500%(Math.PI*2);rx.globalAlpha=.5;rx.beginPath();rx.moveTo(R,R);rx.lineTo(R+Math.sin(a)*(R-8),R-Math.cos(a)*(R-8));rx.stroke();
@@ -381,6 +395,10 @@ function trk(nb,now){for(const b of nb){const r=rngOf(b);if(!r)continue;let m,md
 for(const q of st.boxes){if(q.l!==b.l||q.u||!q.rs)continue;const d=Math.hypot(q.x+q.w/2-cx,q.y+q.h/2-cy);if(d<md){md=d;m=q}}
 if(m){m.u=1;const dt=(now-m.ts)/1000;b.rs=m.rs*.6+r*.4;b.v=dt>.05?m.v*.7+((m.rs-b.rs)/dt)*.3:m.v}else{b.rs=r;b.v=0}b.ts=now}}
 const info=b=>{const r=b.rs,br=st.heading!=null?" · BRG "+String(Math.round((st.heading+((b.x+b.w/2)/V.videoWidth-.5)*69+360)%360)).padStart(3,"0")+"°":"";return "~"+(r>=10?Math.round(r):r.toFixed(1))+"m"+br+(b.v>.8?" · CLOSING":b.v<-.8?" · RECEDING":"")};
+/* probability mode: instant per-target estimates from data the tracker already has */
+function plin(b){const c=b.s||0;let t="ID "+Math.round(c*100)+"%";
+if(b.rs&&b.v>.8){const lat=Math.exp(-Math.pow(((b.x+b.w/2)/V.videoWidth-.5)/.2,2)),pc=lat*Math.min(1,b.v/1.5)*c,eta=b.rs/b.v;t+=" \u00b7 CONTACT "+Math.round(pc*100)+"%"+(eta<30?" \u00b7 ETA "+eta.toFixed(1)+"S":"")}return t}
+function setProb(on){st.prob=on;$("#b-pr").classList.toggle("on",on);say("Probability mode "+(on?"online":"off"))}
 function setTac(on){st.tac=on;$("#b-tc").classList.toggle("on",on);say("Tactical data "+(on?"online":"off"))}
 /* intel: AI dossier on the locked target, shown as a holographic panel */
 const IS='You write short intelligence dossiers for a heads-up display. The user gives the name of an object. Reply with ONLY a JSON object with exactly these keys: "name" (a specific name, max 4 words), "kind" (category, max 3 words), "facts" (an array of exactly 3 short true facts, max 14 words each, such as origin, how it works, or typical price), "verdict" (one dry witty line, max 12 words). If the object is a person, use name "Person", kind "Human" and give only general facts about people. No markdown.';
@@ -427,7 +445,7 @@ function openL(n){if(stack.includes(n))return;stack.push(n);$("#"+n).classList.a
 addEventListener("popstate",()=>{const n=stack.pop();if(n)$("#"+n).classList.remove("on")});
 document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>stack.length&&history.back());
 $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
-$("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
+$("#b-pr").onclick=()=>setProb(!st.prob);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
 $("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};$("#b-ht").onclick=()=>{stack.length&&history.back();hudTest()};
 /* ---------- settings ---------- */
 const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-cp").value=S.cprov;$("#s-ck").value=S.ckey;$("#s-cm").value=S.cmodel;$("#s-cu").value=S.curl;$("#s-gg").value=S.gguf;$("#s-ww").value=S.ww;$("#s-nm").value=S.name;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#s-jt").checked=!!S.joints;$("#ptt").hidden=S.voice!=="hold"};
