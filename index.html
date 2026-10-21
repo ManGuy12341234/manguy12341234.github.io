@@ -52,19 +52,19 @@ body.recon #stage{animation:rc 1.2s}@keyframes rc{0%{filter:brightness(4) hue-ro
 <div id="drawer" class="pane"><button data-x="close">CLOSE ✕</button><button id="b-ht">HUD TEST</button><button id="b-ho">HOLOGRAM</button><button id="b-ss" class="on">SPIDER-SENSE</button><button id="tbtn" hidden>FLASHLIGHT</button><button id="b-in">INTEL · AI</button><button id="b-tc" class="on">TACTICAL DATA</button><button id="b-sc">SCAN PULSE</button><button id="b-se">SETTINGS</button></div>
 <div id="settings" class="pane"><button data-x="close">BACK ✕</button>
 <label>Voice input<select id="s-voice"><option value="wake">Wake phrase “E.V.”</option><option value="hold">Hold to talk</option></select></label>
-<label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label>
+<label>Voice output<input type="checkbox" id="s-tts"></label><label>Haptics<input type="checkbox" id="s-hap"></label><label>Battery saver<input type="checkbox" id="s-bat"></label><label>Body and finger tracking<input type="checkbox" id="s-jt"></label>
 <label>My name<input id="s-nm" placeholder="Peter"></label><label>Brain engine<select id="s-eng"><option value="auto">Auto: GPU, else CPU</option><option value="cpu">CPU only</option><option value="cloud">Cloud (my API key)</option></select></label>
 <label>Cloud service<select id="s-cp"><option value="gemini">Google Gemini (free key)</option><option value="groq">Groq (free key)</option><option value="openrouter">OpenRouter</option><option value="custom">Custom</option></select></label>
 <label>API key<input id="s-ck" type="password" autocomplete="off" placeholder="paste key"></label><label>Model<input id="s-cm"></label><label>Endpoint<input id="s-cu"></label>
 <label>CPU model<input id="s-gg" placeholder="owner/repo:file.gguf"></label><label>Extra wake words<input id="s-ww" placeholder="easy, tv, ..."></label>
-<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 22. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
+<small>Cloud is the smartest brain: get a free key at aistudio.google.com (Gemini) or console.groq.com (Groq), paste it here and set Brain engine to Cloud. Your questions, and a camera frame for "what am I looking at", are sent to that service. CPU model is optional: a GGUF from Hugging Face, for example Qwen/Qwen2.5-1.5B-Instruct-GGUF:qwen2.5-1.5b-instruct-q4_k_m.gguf</small><label>Brain size<select id="s-size"><option value="fast">Fast · 250 MB</option><option value="balanced">Balanced · 700 MB</option><option value="best">Best · 1.7 GB</option></select></label><button id="b-lb">LOAD BRAIN</button><button id="b-di">TEST BRAIN</button><small id="dg">Build 23. Tap TEST BRAIN to check E.V.'s on-device brain.</small><small>E.V. thinks on this phone with a free open model: no key, no account, no cloud AI. Your questions are not sent to any AI service. The first launch downloads the model once and saves it on the phone; after that it works offline. Bigger brains answer better but need a stronger phone. Camera questions use the object detector's list of what it sees (it cannot see pictures itself).</small><small>If the phone cannot run the brain, E.V. falls back to the time, math, what the detector sees and Wikipedia summaries.</small><small>Body and finger tracking draws a small box on every joint it can see (shoulders, elbows, wrists, hips, knees, ankles and all 21 points on each hand) with lines between them. It runs on the phone, sends nothing anywhere, and downloads about 13 MB of models the first time you turn it on. It uses extra battery and can lower the frame rate; Battery saver slows it down. Say "E.V., body tracking" or "E.V., body tracking off".</small><small>E.V. only listens while the app is open on screen. Release of mic and camera happens automatically when you leave.</small>
 <small>Android Chrome may play a system beep when listening starts or stops. If it bothers you, lower the system media/notification volume.</small>
 <small>Hologram mode turns the picture into a cyan projection with scan lines and a flicker, and lifts every detected object into its own floating hologram on a spinning projector ring. It is a visual mode that works in normal light, not a sensor. Tap E.V.'s text box to stop her talking, or to copy the text when she is quiet.</small></div>
-<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 22</div></div>
+<div id="boot"><h1>E.V.</h1><div>SUIT INTERFACE</div><button id="inst" hidden>INSTALL SUIT INTERFACE</button><button id="go">ENGAGE</button><div style="opacity:.6;font-size:11px;max-width:80vw">First launch downloads E.V.'s on-device brain once (about 0.7 GB). Use Wi-Fi.</div><div style="opacity:.45;font-size:11px">BUILD 23</div></div>
 <div id="rot">ROTATE DEVICE TO LANDSCAPE</div>
 <script type="module">
 const $=s=>document.querySelector(s),V=$("#v"),OV=$("#ov"),RD=$("#rad");
-const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto",ckey:"",cprov:"gemini",curl:"https://generativelanguage.googleapis.com/v1beta/openai",cmodel:"gemini-flash-latest",gguf:"",ww:"",name:"Peter"};
+const S={voice:"wake",saver:false,hap:true,tts:true,size:"balanced",engine:"auto",ckey:"",cprov:"gemini",curl:"https://generativelanguage.googleapis.com/v1beta/openai",cmodel:"gemini-flash-latest",gguf:"",ww:"",name:"Peter",joints:false};
 try{Object.assign(S,JSON.parse(localStorage.getItem("ev")||"{}"))}catch{}
 delete S.key;delete S.model;
 const save=()=>{try{localStorage.setItem("ev",JSON.stringify(S))}catch{}};
@@ -117,6 +117,7 @@ const k=c.replace(/\b(please|the|my|turn|switch|set|to)\b/g,"").replace(/\btwo\b
 if(/^(flash ?light|torch)( on| off)?$|^(on|off) (flash ?light|torch)$/.test(k))return torch(!/off/.test(k));
 if(m=k.match(/^zoom (\d) ?x?$/))return zoom(+m[1]);if(/^zoom (out|reset)$/.test(k))return zoom(1);
 if(/^(holo|hologram|holograms|holographic|wireframe)( view| vision| mode)?( on| off)?$|^(on|off) (holo|hologram|holographic|wireframe)( view| mode)?$/.test(k))return setHolo(!/off/.test(k));
+if(/^(body|joint|joints|finger|fingers|hand|hands|skeleton)( and (finger|hand)s?)?( tracking| scan| scanning| mode| view)?( on| off)?$|^(on|off) (body|finger|joint|skeleton)( tracking| scan)?$/.test(k))return setJoints(!/off/.test(k));
 if(/^spider.?sense( on| off)?$|^(on|off) spider.?sense$/.test(k)){st.sense=!/off/.test(k);$("#b-ss").classList.toggle("on",st.sense);return say("Spider-Sense "+(st.sense?"active":"disabled"))}
 if(/^(intel|dossier|target intel|analy[sz]e( target| that| this| it| object)?|deep scan|scan target|identify target)$/.test(k))return intel();
 if(/^(tactical|tac)( data| mode| view| hud)?( on| off)?$|^(on|off) tactical( data| mode)?$/.test(k))return setTac(!/off/.test(k));
@@ -259,10 +260,10 @@ catch(e){if(my===sid)say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 async function diag(){const o=$("#dg");o.textContent="Testing…";
 const g=navigator.gpu?"WebGPU: yes"+(await f16()?" (fp16)":" (no fp16)"):"WebGPU: NO";
-if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 22. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
-if(!BR.ready){o.textContent="Build 22. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
-try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 22. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
-catch(e){o.textContent="Build 22. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
+if(!navigator.gpu&&!BR.ready&&!BR.loading&&!BR.err){o.textContent="Build 23. "+g+". No WebGPU, so E.V. uses the CPU brain. Tap LOAD BRAIN.";return}
+if(!BR.ready){o.textContent="Build 23. "+g+". Brain not loaded"+(BR.loading?" ("+BR.pct+"%).":BR.err?": "+BR.err:". Tap LOAD BRAIN.");return}
+try{const t=await think({sys:"Reply with the single word OK.",q:"ping",max:8,temp:0,timeout:30000});o.textContent="Build 23. "+g+". Brain OK: "+BR.id+" (reply: "+t.trim().slice(0,20)+").";vib(40)}
+catch(e){o.textContent="Build 23. FAILED: "+String(e&&e.message||e).slice(0,120);vib(300)}}
 $("#b-di").onclick=diag;
 $("#b-lb").onclick=()=>{BR.paused=false;BR.tries=0;if(BR.ready){cap("Brain already online: "+BR.id);return}if(BR.loading){cap("Brain is already loading, "+BR.pct+"%.");return}cap("Loading brain…");loadBrain().then(ok=>{if(!ok)cap("Brain failed to load: "+BR.err)})};
 /* ---------- camera & device ---------- */
@@ -286,6 +287,34 @@ navigator.getBattery?.().then(b=>{bat=b;const u=()=>{$("#bat").textContent=`BAT 
 async function loadDet(){if(det)return;try{const M=await import(MP+"vision_bundle.mjs"),fs=await M.FilesetResolver.forVisionTasks(MP+"wasm");
 const mk=d=>M.ObjectDetector.createFromOptions(fs,{baseOptions:{modelAssetPath:MODEL,delegate:d},runningMode:"VIDEO",scoreThreshold:.45,maxResults:6});
 try{det=await mk("GPU")}catch{det=await mk("CPU")}$("#st").textContent="TARGETING ONLINE"}catch{$("#st").textContent="MOTION ONLY";cap("Target AI not cached yet. Open once online. Motion sensing still active.")}}
+/* ---------- body and finger tracking: a small box on every joint (MediaPipe pose + hand landmarkers, on the phone) ---------- */
+const PM="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",HM="https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+const PC=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[27,29],[29,31],[27,31],[28,30],[30,32],[28,32]],PJ=[0,7,8,11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32],HC=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]],TIPS=[4,8,12,16,20];
+let pd,hd,jl=0,lastJ=0;st.pose=[];st.hands=[];
+const sm=(o,n)=>n.map((p,i)=>{const q=o&&o[i]&&o[i].length===p.length?o[i]:null;return p.map((a,k)=>({x:q?q[k].x*.4+a.x*.6:a.x,y:q?q[k].y*.4+a.y*.6:a.y,v:a.visibility}))});
+async function loadJoints(){if(jl)return;jl=1;cap("Loading body and finger tracking…");let p,h;
+try{const M=await import(MP+"vision_bundle.mjs"),fs=await M.FilesetResolver.forVisionTasks(MP+"wasm");
+const mk=async(C,path,o)=>{const b=d=>C.createFromOptions(fs,{baseOptions:{modelAssetPath:path,delegate:d},runningMode:"VIDEO",...o});try{return await b("GPU")}catch{return await b("CPU")}};
+p=await mk(M.PoseLandmarker,PM,{numPoses:2});h=await mk(M.HandLandmarker,HM,{numHands:2});
+if(!S.joints||pd){p.close();h.close();if(!pd)jl=0;return}
+pd=p;hd=h;cap("Body and finger tracking online.");vib([30,40,30])}
+catch(e){try{p&&p.close()}catch{}jl=0;pd=hd=null;S.joints=false;save();$("#s-jt").checked=false;cap("Body tracking models could not load. Open the app once online, then try again.")}}
+function unJoints(){const p=pd,h=hd;pd=hd=null;jl=0;st.pose=[];st.hands=[];try{p&&p.close()}catch{}try{h&&h.close()}catch{}}
+function setJoints(on){S.joints=on;save();$("#s-jt").checked=on;if(on)loadJoints();else unJoints();say("Body and finger tracking "+(on?"online":"off"))}
+function joints(){if(!S.joints||!(st.pose.length||st.hands.length))return;
+const W=OV.width,H=OV.height,s=Math.max(9,W/80),gl=document.body.classList.contains("noglow")?0:8;
+ox.save();ox.lineWidth=Math.max(1.5,W/600);ox.shadowBlur=gl;ox.shadowColor="#3df2ff";
+const box=(p,k)=>{const z=k*s;ox.strokeRect(p.x*W-z/2,p.y*H-z/2,z,z)};
+for(const P of st.pose){const ok=i=>P[i]&&(P[i].v==null||P[i].v>.4);ox.strokeStyle="#3df2ff";ox.beginPath();
+for(const[a,b]of PC)if(ok(a)&&ok(b)){ox.moveTo(P[a].x*W,P[a].y*H);ox.lineTo(P[b].x*W,P[b].y*H)}
+if(ok(0)&&ok(11)&&ok(12)){ox.moveTo(P[0].x*W,P[0].y*H);ox.lineTo((P[11].x+P[12].x)/2*W,(P[11].y+P[12].y)/2*H)}
+ox.globalAlpha=.55;ox.stroke();ox.globalAlpha=1;
+for(const i of PJ)if(ok(i))box(P[i],i===0?1.5:1)}
+for(const P of st.hands){ox.strokeStyle="#ffffff";ox.fillStyle="#3df2ff";ox.beginPath();
+for(const[a,b]of HC){ox.moveTo(P[a].x*W,P[a].y*H);ox.lineTo(P[b].x*W,P[b].y*H)}
+ox.globalAlpha=.55;ox.stroke();ox.globalAlpha=1;
+P.forEach((p,i)=>{if(TIPS.includes(i)){const z=s*.75;ox.fillRect(p.x*W-z/2,p.y*H-z/2,z,z)}else box(p,.6)})}
+ox.restore()}
 /* ---------- render loop ---------- */
 const sc=document.createElement("canvas");sc.width=160;sc.height=90;const sx=sc.getContext("2d",{willReadFrequently:true}),ox=OV.getContext("2d"),rx=RD.getContext("2d");
 function tick(ts){if(!st.run)return;st.raf=requestAnimationFrame(tick);frames++;
@@ -293,6 +322,7 @@ if(ts-t0>=1000){const f=frames*1000/(ts-t0);$("#fps").textContent=Math.round(f)+
 if(V.readyState<2)return;
 if(!(S.saver&&(skip^=1))){analyse(ts)}if(st.holo&&frames%(S.saver?3:2)===0)holo();
 if(ts-lastInf>(S.saver?300:infMs)&&det&&!st.gen){lastInf=ts;try{const nb=det.detectForVideo(V,ts).detections.map(d=>({l:d.categories[0].categoryName,x:d.boundingBox.originX,y:d.boundingBox.originY,w:d.boundingBox.width,h:d.boundingBox.height}));trk(nb,ts);st.boxes=nb}catch{}}
+if(S.joints&&pd&&hd&&!st.gen&&ts-lastJ>(S.saver?250:Math.max(90,infMs))){lastJ=ts;try{st.pose=sm(st.pose,pd.detectForVideo(V,ts).landmarks)}catch{}try{st.hands=sm(st.hands,hd.detectForVideo(V,ts).landmarks)}catch{}}
 draw(ts);radar(ts)}
 function degrade(){adapt++;if(adapt===1)infMs=250;else if(adapt===2)document.body.classList.add("noglow");else infMs=500}
 function analyse(ts){sx.drawImage(V,0,0,160,90);const d=sx.getImageData(0,0,160,90).data,n=160*90,L=new Uint8Array(n);let mv=0;
@@ -301,7 +331,7 @@ const m=prev?mv/n:0;prev=L;let tgt=m>.6?0:Math.min(1,m*6);
 const big=st.boxes.reduce((a,b)=>Math.max(a,b.w*b.h/(V.videoWidth*V.videoHeight)),0);if(big>.25)tgt=Math.max(tgt,Math.min(1,(big-.25)*2.5));
 st.I=st.I*.8+(st.sense?tgt:0)*.2;$("#ss").style.opacity=st.I>.2?Math.min(1,st.I):0;
 if(st.I>.2){const k=Math.ceil(st.I*3),on=90+Math.round(st.I*150),p=[],dur=k*(on+60);for(let i=0;i<k;i++)p.push(on,60);if(Date.now()-lastAlert>dur+120){lastAlert=Date.now();vib(p)}}}
-function draw(ts){ox.clearRect(0,0,OV.width,OV.height);anlDraw();const cx=OV.width/2,cy=OV.height/2;let best,bd=1e9;
+function draw(ts){ox.clearRect(0,0,OV.width,OV.height);anlDraw();joints();const cx=OV.width/2,cy=OV.height/2;let best,bd=1e9;
 ox.lineWidth=Math.max(2,OV.width/400);ox.font=`${Math.round(OV.width/55)}px monospace`;
 for(const b of st.boxes){const dx=b.x+b.w/2-cx,dy=b.y+b.h/2-cy,dd=Math.hypot(dx,dy);if(dd<bd){bd=dd;best=b}}
 for(const b of st.boxes){const L=b===best&&bd<OV.width*.18,cl=st.tac&&b.v>.8;ox.strokeStyle=ox.fillStyle=(L||cl)?"#ff3d5a":"#3df2ff";if(st.holo)holoBox(b,ts,L||cl);else ox.strokeRect(b.x,b.y,b.w,b.h);ox.fillText((L?"LOCK ":"")+b.l.toUpperCase(),b.x+4,b.y-6);if(st.tac&&b.rs)ox.fillText(info(b),b.x+4,Math.min(OV.height-6,b.y+b.h+Math.round(OV.width/55)+2))}
@@ -379,7 +409,7 @@ catch(e){say(brainErr(e));vib(400)}
 finally{st.busy=0;st.gen=0;st.anl=null;$("#st").textContent=det?"TARGETING ONLINE":"ONLINE"}}
 /* E.V. film-style commands: HUD test, target acquisition, simulated drone strike */
 function hudTest(){const f=(a,b)=>"▸ "+a+" "+".".repeat(Math.max(2,15-a.length))+" "+b,h=$("#hud"),w=$("#sweep");
-const L=[["DISPLAY","OK"],["OPTICS",V.videoWidth?V.videoWidth+"X"+V.videoHeight:"NO LINK"],["TARGETING",det?"ONLINE":"MOTION ONLY"],["COMPASS",st.heading!=null?Math.round(st.heading)+"°":"NO SIGNAL"],["POWER",bat?Math.round(bat.level*100)+"%":"N/A"],["AI CORE",BR.ready?"ONLINE":BR.loading?"LOADING "+BR.pct+"%":"BASIC"],["VOICE",rec?"LISTENING":"STANDBY"],["DRONE UPLINK","STANDBY"]];
+const L=[["DISPLAY","OK"],["OPTICS",V.videoWidth?V.videoWidth+"X"+V.videoHeight:"NO LINK"],["TARGETING",det?"ONLINE":"MOTION ONLY"],["BODY TRACK",S.joints?(pd&&hd?"ONLINE":"LOADING"):"OFF"],["COMPASS",st.heading!=null?Math.round(st.heading)+"°":"NO SIGNAL"],["POWER",bat?Math.round(bat.level*100)+"%":"N/A"],["AI CORE",BR.ready?"ONLINE":BR.loading?"LOADING "+BR.pct+"%":"BASIC"],["VOICE",rec?"LISTENING":"STANDBY"],["DRONE UPLINK","STANDBY"]];
 for(const x of[h,w]){x.classList.remove("test","go");void x.offsetWidth}h.classList.add("test");w.classList.add("go");ping();vib([40,60,40,60,40]);
 showPanel("HUD TEST",L.map(x=>f(...x)).join("\n")+"\n\n» "+(det?"ALL SYSTEMS NOMINAL":"TARGETING OFFLINE"));
 say("HUD test complete. "+(det?"All systems nominal.":"Targeting is offline."))}
@@ -395,7 +425,7 @@ $("#menu").onclick=()=>openL("drawer");$("#b-se").onclick=()=>openL("settings");
 $("#b-ho").onclick=()=>setHolo(!st.holo);$("#b-ss").onclick=()=>cmd(st.sense?"spider sense off":"spider sense on");
 $("#tbtn").onclick=()=>torch(!$("#tbtn").classList.contains("on"));$("#b-in").onclick=()=>{stack.length&&history.back();intel()};$("#b-tc").onclick=()=>setTac(!st.tac);$("#intel").onclick=hidePanel;$("#b-sc").onclick=()=>{stack.length&&history.back();scan()};$("#b-ht").onclick=()=>{stack.length&&history.back();hudTest()};
 /* ---------- settings ---------- */
-const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-cp").value=S.cprov;$("#s-ck").value=S.ckey;$("#s-cm").value=S.cmodel;$("#s-cu").value=S.curl;$("#s-gg").value=S.gguf;$("#s-ww").value=S.ww;$("#s-nm").value=S.name;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#ptt").hidden=S.voice!=="hold"};
+const sync=()=>{$("#s-voice").value=S.voice;$("#s-eng").value=S.engine;$("#s-cp").value=S.cprov;$("#s-ck").value=S.ckey;$("#s-cm").value=S.cmodel;$("#s-cu").value=S.curl;$("#s-gg").value=S.gguf;$("#s-ww").value=S.ww;$("#s-nm").value=S.name;$("#s-size").value=S.size;$("#s-tts").checked=S.tts;$("#s-hap").checked=S.hap;$("#s-bat").checked=S.saver;$("#s-jt").checked=!!S.joints;$("#ptt").hidden=S.voice!=="hold"};
 sync();
 $("#s-voice").onchange=e=>{S.voice=e.target.value;save();sync();pauseRec();want=S.voice==="wake"&&st.run;startRec()};
 $("#s-ww").onchange=e=>{S.ww=e.target.value;save();XW=xw()};
@@ -406,7 +436,7 @@ const rebrain=()=>{BR.noGpu=false;BR.paused=false;BR.tries=0;swapBrain()};
 $("#s-cp").onchange=e=>{S.cprov=e.target.value;const p=CP[S.cprov];if(p){S.curl=p[0];S.cmodel=p[1]}save();sync();if(S.engine==="cloud")rebrain()};
 for(const[i,k]of[["#s-ck","ckey"],["#s-cm","cmodel"],["#s-cu","curl"],["#s-gg","gguf"]])$(i).onchange=e=>{S[k]=e.target.value.trim();save();if(S.engine==="cloud"||(k==="gguf"&&S.engine==="cpu"))rebrain()};
 $("#s-size").onchange=e=>{S.size=e.target.value;save();BR.paused=false;BR.tries=0;cap("Switching brain size. A download of about "+BS[S.size].mb+" starts if it is not saved on this phone yet.");swapBrain()};
-$("#s-tts").onchange=e=>{S.tts=e.target.checked;save()};$("#s-hap").onchange=e=>{S.hap=e.target.checked;save()};
+$("#s-jt").onchange=e=>setJoints(e.target.checked);$("#s-tts").onchange=e=>{S.tts=e.target.checked;save()};$("#s-hap").onchange=e=>{S.hap=e.target.checked;save()};
 $("#s-bat").onchange=e=>{S.saver=e.target.checked;save();document.body.classList.toggle("noglow",S.saver||adapt>1)};
 $("#cap").onclick=()=>{const e=$("#cap");if(st.speaking||st.gen){stopTalk();return}navigator.clipboard?.writeText(e.textContent).then(()=>{vib(15);e.style.borderColor="#fff";setTimeout(()=>e.style.borderColor="",250)}).catch(()=>{})};
 $("#ptt").addEventListener("pointerdown",()=>{want=true;startRec()});
@@ -424,5 +454,5 @@ if(isApp())hideInst();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("#go").onclick=async()=>{try{await document.documentElement.requestFullscreen({navigationUI:"hide"})}catch{}
 try{await screen.orientation.lock("landscape")}catch{}
-try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>{say("Hello"+nm()+". E.V. online. Say E.V., then a command, or try HUD test.");setTimeout(autoBrain,4000)})}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
+try{await start();st.booted=true;$("#boot").hidden=true;$("#st").textContent="ONLINE";loadDet().then(()=>{if(S.joints)loadJoints();say("Hello"+nm()+". E.V. online. Say E.V., then a command, or try HUD test.");setTimeout(autoBrain,4000)})}catch(e){cap("Camera access denied or unavailable.");vib(400)}};
 </script></body></html>

@@ -9,9 +9,11 @@ Files: `index.html`, `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.
 4. Allow Camera and Microphone when asked. Compass and battery need no prompt.
 5. After updating files, bump `V` in `sw.js` (e.g. `ev-v2`) so phones pick up the change.
 
-Voice (wake phrase "E.V."). New: "HUD test" (systems-check panel + sweep), "target" (marks what is in the reticle), "drone strike" (simulated, harmless), "help". Also: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., hologram", "E.V., intel", "E.V., tactical off", "E.V., scan", "E.V., spider sense off", "E.V., battery", "E.V., settings".
+Voice (wake phrase "E.V."). New: "HUD test" (systems-check panel + sweep), "target" (marks what is in the reticle), "drone strike" (simulated, harmless), "help". Also: say "E.V., flashlight on", "E.V., zoom 4x", "E.V., hologram", "E.V., body tracking", "E.V., intel", "E.V., tactical off", "E.V., scan", "E.V., spider sense off", "E.V., battery", "E.V., settings".
 
 **Hologram mode:** tap HOLOGRAM or say "E.V., hologram" (off: "E.V., hologram off"). The picture becomes a cyan projection with scan lines and a flicker, and every detected object is lifted out as its own hologram on a spinning projector ring (red when it is locked or closing in). It is a visual effect that works in normal light.
+
+**Body and finger tracking:** Settings -> Body and finger tracking (or say "E.V., body tracking" / "E.V., body tracking off"). A small box is drawn on every joint the camera can see: head, shoulders, elbows, wrists, hips, knees, ankles and feet on up to two people, plus all 21 points on each of up to two hands, with lines between them (fingertips are filled boxes). It runs on the phone with MediaPipe (pose and hand landmarkers), sends nothing anywhere, and downloads about 13 MB of models the first time it is turned on; after that it works offline. It is off by default because it costs battery and some frame rate (Battery saver slows it down). It remembers your choice. Stand back far enough that your whole body is in the picture, and keep hands in good light.
 
 **Intel (AI):** aim the red lock reticle at something (or just point the camera) and say "E.V., intel" or tap INTEL. A scanner sweeps the target, then a holographic dossier types out on the right: name, class, three facts and a one-line verdict. E.V. reads the highlights aloud and you can ask follow-ups ("how much does it cost?").
 
